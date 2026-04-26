@@ -7,12 +7,14 @@
   --color-midnight-3: #1f1f3d;
   --color-parchment: #ece1c4;
   --color-parchment-2: #d8c89c;
-  --color-brass: #c9a961;
-  --color-brass-2: #8a7340;
+  --color-brass: #c4a8f0;
+  --color-brass-2: #5a3fa0;
   --color-plum: #4a1c40;
   --color-blood: #7a1f24;
   --color-forest: #1f3a2e;
-  --color-ink: #1c1a14;
+  --color-ink: #1f1633;
+  --color-ink-soft: #4a3f5e;
+  --color-ink-mute: #7a708c;
 
   --font-display: "Cinzel", "Noto Serif KR", serif;
   --font-serif: "Cormorant Garamond", "Noto Serif KR", serif;
@@ -27,34 +29,18 @@ body,
 }
 
 body {
-  background-color: var(--color-midnight);
-  color: var(--color-parchment);
+  /* #F4F0FA 중심 — 달빛 양피지, 라벤더 빛 서재 */
+  background-color: #F4F0FA;
+  color: var(--color-ink);
   font-family: var(--font-sans);
-  /* 별빛이 깔린 듯한 미세한 노이즈 + 그라데이션 */
+  /* 모서리에 아주 옅은 황동/자주 그라데이션으로 깊이감만 줌 */
   background-image:
-    radial-gradient(ellipse at top, rgba(74, 28, 64, 0.25), transparent 60%),
-    radial-gradient(ellipse at bottom, rgba(31, 31, 61, 0.6), transparent 70%),
-    radial-gradient(circle at 20% 30%, rgba(201, 169, 97, 0.06) 0%, transparent 1%),
-    radial-gradient(circle at 70% 60%, rgba(201, 169, 97, 0.05) 0%, transparent 1%),
-    radial-gradient(circle at 40% 80%, rgba(236, 225, 196, 0.04) 0%, transparent 1%),
-    radial-gradient(circle at 85% 15%, rgba(236, 225, 196, 0.05) 0%, transparent 1%);
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(107, 77, 184, 0.06), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, rgba(90, 63, 160, 0.05), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 0% 100%, rgba(107, 77, 184, 0.04), transparent 60%);
   background-attachment: fixed;
 }
 
-/* 별빛 — 의사 요소로 점점이 흩뿌리기 */
 body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(1px 1px at 10% 20%, rgba(255, 255, 255, 0.5), transparent 50%),
-    radial-gradient(1px 1px at 80% 30%, rgba(255, 255, 255, 0.4), transparent 50%),
-    radial-gradient(1px 1px at 30% 70%, rgba(255, 255, 255, 0.3), transparent 50%),
-    radial-gradient(1px 1px at 60% 85%, rgba(255, 255, 255, 0.4), transparent 50%),
-    radial-gradient(1px 1px at 90% 60%, rgba(255, 255, 255, 0.35), transparent 50%),
-    radial-gradient(1.5px 1.5px at 15% 50%, rgba(201, 169, 97, 0.5), transparent 50%),
-    radial-gradient(1.5px 1.5px at 75% 10%, rgba(201, 169, 97, 0.4), transparent 50%);
-  background-size: 100% 100%;
-  z-index: 0;
+  display: none;
 }

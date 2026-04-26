@@ -12,7 +12,7 @@ export default function BookCard({ book }: Props) {
     <article className="group cursor-pointer">
       {/* 책 표지 */}
       <div
-        className="relative aspect-[2/3] overflow-hidden rounded-[2px] shadow-[0_8px_24px_-8px_rgba(0,0,0,0.7)] ring-1 ring-black/40 transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-[0_16px_40px_-12px_rgba(201,169,97,0.4)]"
+        className="relative aspect-[2/3] overflow-hidden rounded-[2px] shadow-[0_8px_28px_-6px_rgba(31,22,51,0.22)] ring-1 ring-black/20 transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-[0_16px_40px_-10px_rgba(138,115,64,0.35)]"
         style={{
           background: `linear-gradient(155deg, ${from} 0%, ${to} 100%)`,
         }}
@@ -94,8 +94,8 @@ export default function BookCard({ book }: Props) {
 
       {/* 카드 하단 메타 */}
       <div className="mt-3 px-1">
-        <p className="font-korean-serif text-sm text-parchment/90">{book.title}</p>
-        <p className="mt-0.5 text-xs text-parchment/50">
+        <p className="font-korean-serif text-sm text-ink">{book.title}</p>
+        <p className="mt-0.5 text-xs text-ink-mute">
           {book.author} · 노트 {book.notes}
         </p>
       </div>
