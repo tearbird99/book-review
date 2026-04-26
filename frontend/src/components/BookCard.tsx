@@ -96,7 +96,7 @@ export default function BookCard({ book }: Props) {
 /* ── 책갈피: 읽는 중 — 실크 리본 끈 ── */
 function Bookmark() {
   return (
-    <div className="absolute top-0 right-6 z-20 drop-shadow-[1px_2px_4px_rgba(0,0,0,0.45)]">
+    <div className="absolute top-0 right-6 z-20 drop-shadow-[1px_2px_4px_rgba(0,0,0,0.45)] transition-transform duration-500 group-hover:-translate-y-1">
       <svg width="7" height="36" viewBox="0 0 7 36" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="ribbon-sheen" x1="0" y1="0" x2="7" y2="0" gradientUnits="userSpaceOnUse">

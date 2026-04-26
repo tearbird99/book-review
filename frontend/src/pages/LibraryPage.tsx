@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { mockBooks, type ReadStatus } from '../data/mockBooks'
+import { mockNotes } from '../data/mockNotes'
 import BookCard from '../components/BookCard'
 
 const TABS: { key: ReadStatus | 'all'; label: string }[] = [
@@ -104,14 +105,18 @@ export default function LibraryPage() {
         </button>
       </section>
 
-      {/* 푸터 장식 */}
-      <footer className="mt-24 flex items-center justify-center gap-4 opacity-40">
+      {/* 푸터 구분선 */}
+      <div className="mt-24 flex items-center justify-center gap-4 opacity-40">
         <span className="h-px w-16 bg-brass-2" />
         <span className="font-display text-[10px] uppercase tracking-[0.4em] text-brass-2">
           ✦ ✦ ✦
         </span>
         <span className="h-px w-16 bg-brass-2" />
-      </footer>
+      </div>
+
+      {/* 독서 기록 히트맵 */}
+      <ReadingHeatmap />
+
     </div>
   )
 }
@@ -165,5 +170,157 @@ function ChevronDown({ className }: { className?: string }) {
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="m6 9 6 6 6-6" />
     </svg>
+  )
+}
+
+function ReadingHeatmap() {
+  const noteCounts: Record<string, number> = {}
+  mockNotes.forEach((n) => {
+    noteCounts[n.read_date] = (noteCounts[n.read_date] || 0) + 1
+  })
+
+  const today = new Date('2026-04-26')
+  const startDate = new Date(today)
+  startDate.setDate(today.getDate() - 52 * 7)
+  startDate.setDate(startDate.getDate() - startDate.getDay())
+
+  type Cell = { dateStr: string; count: number; future: boolean }
+  const allDates: Cell[] = []
+  const cur = new Date(startDate)
+  while (allDates.length < 53 * 7) {
+    const y = cur.getFullYear()
+    const m = String(cur.getMonth() + 1).padStart(2, '0')
+    const d = String(cur.getDate()).padStart(2, '0')
+    const dateStr = `${y}-${m}-${d}`
+    allDates.push({ dateStr, count: noteCounts[dateStr] || 0, future: cur > today })
+    cur.setDate(cur.getDate() + 1)
+  }
+
+  const weeks: Cell[][] = []
+  for (let i = 0; i < allDates.length; i += 7) {
+    weeks.push(allDates.slice(i, i + 7))
+  }
+
+  const CELL = 16
+  const GAP = 3
+  const COL_W = CELL + GAP
+  const LABEL_W = 22
+  const FONT = 11
+
+  function cellBg(count: number, future: boolean): string {
+    if (future) return '#e8e4f0'
+    if (count === 0) return '#ddd6f0'
+    if (count === 1) return '#d4b896'
+    if (count === 2) return '#c9a961'
+    if (count === 3) return '#a8873a'
+    return '#7a5818'
+  }
+
+  // 최소 4주 간격으로만 월 라벨 표시 (겹침 방지)
+  const monthLabels: string[] = []
+  let lastLabelWi = -5
+  for (let wi = 0; wi < weeks.length; wi++) {
+    const d = new Date(weeks[wi][0].dateStr)
+    const isNewMonth = wi === 0 || d.getMonth() !== new Date(weeks[wi - 1][0].dateStr).getMonth()
+    if (isNewMonth && wi - lastLabelWi >= 4) {
+      monthLabels.push(d.toLocaleDateString('en-US', { month: 'short' }))
+      lastLabelWi = wi
+    } else {
+      monthLabels.push('')
+    }
+  }
+
+  const startYear = new Date(weeks[0][0].dateStr).getFullYear()
+  const endYear = today.getFullYear()
+  const yearLabel = startYear === endYear ? `${startYear}년` : `${startYear}–${endYear}년`
+
+  const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+
+  return (
+    <section className="mt-10 pb-20">
+      {/* 헤더: 제목 + 범례 나란히 */}
+      <div className="mb-5 flex items-end gap-6">
+        <div>
+          <p className="font-display text-[10px] uppercase tracking-[0.3em] text-brass-2/60">
+            Annales Lectionis
+          </p>
+          <h2 className="mt-1 font-korean-serif text-base text-ink">
+            독서 기록 {yearLabel}
+          </h2>
+        </div>
+        <div className="flex items-center gap-1.5 pb-0.5">
+          <span style={{ fontSize: FONT, color: '#7a708c', fontFamily: 'Cinzel, serif' }}>적음</span>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              style={{ width: CELL, height: CELL, backgroundColor: cellBg(i, false), borderRadius: 2 }}
+            />
+          ))}
+          <span style={{ fontSize: FONT, color: '#7a708c', fontFamily: 'Cinzel, serif' }}>많음</span>
+        </div>
+      </div>
+
+      {/* 그리드 */}
+      <div className="overflow-x-auto">
+        <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
+          {/* 월 라벨 행 */}
+          <div style={{ display: 'flex', marginLeft: LABEL_W + 4, marginBottom: 6 }}>
+            {weeks.map((_, wi) => (
+              <div
+                key={wi}
+                style={{
+                  width: COL_W,
+                  flexShrink: 0,
+                  fontSize: FONT,
+                  color: '#7a708c',
+                  fontFamily: 'Cinzel, serif',
+                  letterSpacing: '0.03em',
+                  lineHeight: 1,
+                }}
+              >
+                {monthLabels[wi]}
+              </div>
+            ))}
+          </div>
+
+          {/* 요일별 행 — 7개 모두 표시 */}
+          {DAYS.map((day, di) => (
+            <div key={di} style={{ display: 'flex', alignItems: 'center', marginBottom: GAP }}>
+              <div
+                style={{
+                  width: LABEL_W,
+                  marginRight: 4,
+                  fontSize: FONT,
+                  color: '#7a708c',
+                  textAlign: 'right',
+                  fontFamily: 'Cinzel, serif',
+                  flexShrink: 0,
+                  lineHeight: 1,
+                }}
+              >
+                {day}
+              </div>
+              {weeks.map((week, wi) => {
+                const cell = week[di]
+                return (
+                  <div
+                    key={wi}
+                    title={`${cell.dateStr}: 노트 ${cell.count}개`}
+                    style={{
+                      width: CELL,
+                      height: CELL,
+                      marginRight: GAP,
+                      backgroundColor: cellBg(cell.count, cell.future),
+                      borderRadius: 2,
+                      flexShrink: 0,
+                    }}
+                  />
+                )
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   )
 }
