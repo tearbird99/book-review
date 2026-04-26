@@ -6,7 +6,9 @@ export type MockBook = {
   author: string
   status: ReadStatus
   notes: number
-  rating?: number
+  rating?: number       // 책 단위 별점 (1-5), 노트가 아닌 책에 귀속
+  totalPages?: number
+  currentPage?: number
   spineGradient: [string, string]
   accent: string
   ornament: 'star' | 'moon' | 'eye' | 'rune' | 'flame'
@@ -25,6 +27,8 @@ export const mockBooks: MockBook[] = [
     accent: '#c9a961',
     ornament: 'flame',
     category: '소설',
+    totalPages: 256,
+    currentPage: 256,
   },
   {
     id: 2,
@@ -37,6 +41,8 @@ export const mockBooks: MockBook[] = [
     accent: '#c9a961',
     ornament: 'eye',
     category: '소설',
+    totalPages: 200,
+    currentPage: 200,
   },
   {
     id: 3,
@@ -49,6 +55,8 @@ export const mockBooks: MockBook[] = [
     accent: '#d8c89c',
     ornament: 'star',
     category: '과학',
+    totalPages: 719,
+    currentPage: 342,
   },
   {
     id: 4,
@@ -56,10 +64,13 @@ export const mockBooks: MockBook[] = [
     author: '미하엘 엔데',
     status: 'reading',
     notes: 3,
+    rating: 4,
     spineGradient: ['#1f3a2e', '#2d5240'],
     accent: '#c9a961',
     ornament: 'moon',
     category: '동화',
+    totalPages: 480,
+    currentPage: 180,
   },
   {
     id: 5,
@@ -71,6 +82,8 @@ export const mockBooks: MockBook[] = [
     accent: '#d8c89c',
     ornament: 'star',
     category: '동화',
+    totalPages: 144,
+    currentPage: 0,
   },
   {
     id: 6,
@@ -82,5 +95,7 @@ export const mockBooks: MockBook[] = [
     accent: '#c9a961',
     ornament: 'rune',
     category: '철학',
+    totalPages: 518,
+    currentPage: 0,
   },
 ]
