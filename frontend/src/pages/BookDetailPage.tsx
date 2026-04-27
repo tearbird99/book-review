@@ -1,16 +1,21 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import type { ReadStatus } from '../data/mockBooks'
+import type { ReadStatus, MockBook } from '../data/mockBooks'
 import NoteCard from '../components/NoteCard'
 import Ornament from '../components/Ornament'
 import { useBooks } from '../contexts/BookContext'
 
 type Tab = 'notes' | 'info'
 
+const CATEGORIES = ['소설', '과학', '철학', '동화']
+
 export default function BookDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const { books, notes: allNotes } = useBooks()
+  const { books, notes: allNotes, updateBook } = useBooks()
   const [activeTab, setActiveTab] = useState<Tab>('notes')
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [editedBook, setEditedBook] = useState<MockBook | null>(null)
+  const [categoryMode, setCategoryMode] = useState<'select' | 'custom'>('select')
 
   const book = books.find((b) => b.id === Number(id))
   const notes = allNotes.filter((n) => n.book_id === Number(id))
@@ -23,24 +28,53 @@ export default function BookDetailPage() {
     )
   }
 
-  const { totalPages = 0, currentPage = 0 } = book
+  const displayBook = isEditMode && editedBook ? editedBook : book
+  const { totalPages = 0, currentPage = 0 } = displayBook
   const progress = totalPages > 0 ? Math.round((currentPage / totalPages) * 100) : 0
 
   const [from, to] = book.spineGradient
 
+  const handleSaveEdit = () => {
+    if (!editedBook) return
+    updateBook(book.id, editedBook)
+    setIsEditMode(false)
+  }
+
+  const handleCancelEdit = () => {
+    setIsEditMode(false)
+    setEditedBook(null)
+    setCategoryMode('select')
+  }
+
   return (
     <div className="mx-auto max-w-3xl px-6 pb-24 pt-10">
-      {/* 뒤로가기 */}
-      <Link
-        to="/"
-        className="group inline-flex items-center gap-2 font-display text-[10px] uppercase tracking-[0.3em] text-brass-2/70 transition-colors hover:text-brass-2"
-      >
-        <ChevronLeft className="h-3 w-3 transition-transform group-hover:-translate-x-0.5" />
-        서재로
-      </Link>
+      {/* 상단 네비게이션 */}
+      <div className="flex items-center justify-between mb-4">
+        <Link
+          to="/"
+          className="group inline-flex items-center gap-2 font-display text-[10px] uppercase tracking-[0.3em] text-brass-2/70 transition-colors hover:text-brass-2"
+        >
+          <ChevronLeft className="h-3 w-3 transition-transform group-hover:-translate-x-0.5" />
+          서재로
+        </Link>
+        <button
+          onClick={() => {
+            setIsEditMode(true)
+            setEditedBook({ ...book })
+            const isInCategory = CATEGORIES.includes(book.category)
+            setCategoryMode(isInCategory ? 'select' : 'custom')
+          }}
+          className={`text-brass-2 transition-colors hover:text-brass-2/80 ${
+            isEditMode ? 'invisible' : ''
+          }`}
+          aria-label="수정"
+        >
+          <PencilIcon />
+        </button>
+      </div>
 
       {/* 책 헤더 */}
-      <header className="mt-8 flex gap-8">
+      <header className="mt-8 flex items-start gap-8">
         {/* 책 표지 미니 — relative 래퍼로 책갈피가 삐져나올 수 있게 */}
         <div className="relative shrink-0">
           {/* 읽는 중: 책갈피 */}
@@ -78,33 +112,149 @@ export default function BookDetailPage() {
 
         {/* 책 정보 */}
         <div className="flex flex-1 flex-col justify-center">
-          <div className="flex items-center gap-2.5">
-            <span className="font-display text-[10px] uppercase tracking-[0.3em] text-brass-2/80">
-              {book.category}
-            </span>
+          <div className={`flex gap-2.5 ${isEditMode && editedBook ? 'items-start' : 'items-center'}`}>
+            {isEditMode && editedBook ? (
+              <div className="flex-1">
+                {categoryMode === 'select' ? (
+                  <>
+                    <select
+                      value={editedBook.category || ''}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        if (val === '') {
+                          setCategoryMode('custom')
+                        } else {
+                          setEditedBook({ ...editedBook, category: val })
+                        }
+                      }}
+                      className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                    >
+                      {CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                      <option value="">기타 (직접 입력)</option>
+                    </select>
+                  </>
+                ) : (
+                  <div className="space-y-1">
+                    <input
+                      type="text"
+                      value={editedBook.category}
+                      onChange={(e) => setEditedBook({ ...editedBook, category: e.target.value })}
+                      className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                      placeholder="카테고리"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setCategoryMode('select')}
+                      className="text-xs text-brass-2 hover:underline"
+                    >
+                      목록에서 선택하기
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <span className="font-display text-[10px] uppercase tracking-[0.3em] text-brass-2/80">
+                {book.category}
+              </span>
+            )}
             <StatusLabel status={book.status} />
           </div>
-          <h1 className="mt-2 font-korean-serif text-2xl font-semibold leading-snug text-ink" style={{ wordBreak: 'keep-all' }}>
-            {book.title}
-          </h1>
-          <p className="mt-1 font-serif text-sm italic text-ink-soft">{book.author}</p>
+          {isEditMode && editedBook ? (
+            <input
+              type="text"
+              value={editedBook.title}
+              onChange={(e) => setEditedBook({ ...editedBook, title: e.target.value })}
+              className="mt-2 rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-2xl font-semibold focus:border-brass-2 focus:outline-none"
+              style={{ wordBreak: 'keep-all' }}
+            />
+          ) : (
+            <h1 className="mt-2 font-korean-serif text-2xl font-semibold leading-snug text-ink" style={{ wordBreak: 'keep-all' }}>
+              {book.title}
+            </h1>
+          )}
+          {isEditMode && editedBook ? (
+            <input
+              type="text"
+              value={editedBook.author}
+              onChange={(e) => setEditedBook({ ...editedBook, author: e.target.value })}
+              className="mt-1 rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-serif text-sm italic focus:border-brass-2 focus:outline-none"
+            />
+          ) : (
+            <p className="mt-1 font-serif text-sm italic text-ink-soft">{book.author}</p>
+          )}
 
           {/* 통계 뱃지들 */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <StatBadge label="노트" value={`${notes.length}개`} />
-            {book.rating != null && (
-              <StatBadge
-                label="내 별점"
-                value={'★'.repeat(book.rating) + '☆'.repeat(5 - book.rating)}
-              />
-            )}
-            {notes.length > 0 && (
-              <StatBadge
-                label="최근 독서"
-                value={notes[notes.length - 1].read_date.replace(/-/g, '.')}
-              />
-            )}
-          </div>
+          {!isEditMode && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <StatBadge label="노트" value={`${notes.length}개`} />
+              {book.rating != null && (
+                <StatBadge
+                  label="내 별점"
+                  value={'★'.repeat(book.rating) + '☆'.repeat(5 - book.rating)}
+                />
+              )}
+              {notes.length > 0 && (
+                <StatBadge
+                  label="최근 독서"
+                  value={notes[notes.length - 1].read_date.replace(/-/g, '.')}
+                />
+              )}
+            </div>
+          )}
+
+          {/* 편집 모드: 필드 수정 */}
+          {isEditMode && editedBook && (
+            <div className="mt-4 space-y-4 rounded-sm bg-brass-2/5 p-4">
+              <div>
+                <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">별점</label>
+                <div className="mt-2">
+                  <StarRating
+                    value={editedBook.rating || 0}
+                    onChange={(rating) => setEditedBook({ ...editedBook, rating })}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">읽은 날짜</label>
+                <input
+                  type="date"
+                  value={notes.length > 0 ? notes[notes.length - 1].read_date : ''}
+                  onChange={(e) => {
+                    const newDate = e.target.value
+                    // This would update the note's read_date in a real implementation
+                  }}
+                  className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">전체 페이지</label>
+                  <input
+                    type="number"
+                    value={editedBook.totalPages}
+                    onChange={(e) => setEditedBook({ ...editedBook, totalPages: Number(e.target.value) })}
+                    className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                    min="1"
+                  />
+                </div>
+                <div>
+                  <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">읽은 페이지</label>
+                  <input
+                    type="number"
+                    value={editedBook.currentPage}
+                    onChange={(e) => setEditedBook({ ...editedBook, currentPage: Number(e.target.value) })}
+                    className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                    min="0"
+                    max={editedBook.totalPages}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* 페이지 진행 바 */}
           {totalPages > 0 && (
@@ -125,6 +275,24 @@ export default function BookDetailPage() {
           )}
         </div>
       </header>
+
+      {/* 편집 모드: 저장/취소 버튼 */}
+      {isEditMode && (
+        <div className="mt-8 flex gap-3">
+          <button
+            onClick={handleCancelEdit}
+            className="flex-1 rounded-sm border border-brass-2/25 px-4 py-3 font-korean-serif text-sm font-medium text-ink-mute transition-colors hover:border-brass-2/50 hover:text-ink-soft"
+          >
+            취소
+          </button>
+          <button
+            onClick={handleSaveEdit}
+            className="flex-1 rounded-sm bg-brass-2 px-4 py-3 font-korean-serif text-sm font-medium text-white transition-colors hover:bg-brass-2/90"
+          >
+            저장
+          </button>
+        </div>
+      )}
 
       {/* 구분선 */}
       <div className="mt-10 flex items-center gap-4">
@@ -304,5 +472,90 @@ function QuillIcon() {
       <path d="M20 2C14 2 6 8 6 16c0 2 .5 3.5 1 4.5L3 22l2-4c-1-1.5-1.5-3-1.5-4.5C3.5 6.5 11 2 20 2z" />
       <path d="M6 16c2-2 4-3 6-3s4 1 4 3" />
     </svg>
+  )
+}
+
+function PencilIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+  )
+}
+
+function StarRating({ value, onChange }: { value: number; onChange: (val: number) => void }) {
+  const [hoveredRating, setHoveredRating] = useState<number | null>(null)
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>, starIndex: number) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const isLeftHalf = x < rect.width / 2
+    const rating = starIndex + (isLeftHalf ? 0.5 : 1)
+    setHoveredRating(rating)
+  }
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>, starIndex: number) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const isLeftHalf = x < rect.width / 2
+    const rating = starIndex + (isLeftHalf ? 0.5 : 1)
+    onChange(rating)
+  }
+
+  const displayRating = hoveredRating !== null ? hoveredRating : value
+
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-1">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <button
+            key={i}
+            type="button"
+            onMouseMove={(e) => handleMouseMove(e, i)}
+            onClick={(e) => handleClick(e, i)}
+            onMouseLeave={() => setHoveredRating(null)}
+            className="relative cursor-pointer"
+          >
+            {/* 배경 별 (회색) */}
+            <svg
+              width="36"
+              height="36"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="text-gray-300"
+            >
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+
+            {/* 채워진 별 (오버레이) */}
+            <div
+              className="absolute left-0 top-0 overflow-hidden transition-all"
+              style={{
+                width: `${Math.min(Math.max(displayRating - i, 0), 1) * 36}px`,
+              }}
+            >
+              <svg
+                width="36"
+                height="36"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="text-brass-2"
+              >
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {displayRating > 0 && (
+        <p className="font-korean-serif text-sm text-ink-soft">
+          {'★'.repeat(Math.floor(displayRating))}
+          {displayRating % 1 !== 0 ? '⯨' : ''}
+          {'☆'.repeat(5 - Math.ceil(displayRating))} ({displayRating}/5)
+        </p>
+      )}
+    </div>
   )
 }

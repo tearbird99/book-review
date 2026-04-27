@@ -7,6 +7,7 @@ type BookContextType = {
   notes: MockNote[]
   addBook: (data: BookFormData) => { bookId: number; noteId: number }
   deleteBook: (bookId: number) => void
+  updateBook: (bookId: number, updates: Partial<MockBook>) => void
 }
 
 export type BookFormData = {
@@ -73,8 +74,16 @@ export function BookProvider({ children }: { children: ReactNode }) {
     setAddedNotes(addedNotes.filter((n) => n.book_id !== bookId))
   }
 
+  const updateBook = (bookId: number, updates: Partial<MockBook>) => {
+    setAddedBooks(
+      addedBooks.map((b) =>
+        b.id === bookId ? { ...b, ...updates } : b
+      )
+    )
+  }
+
   return (
-    <BookContext.Provider value={{ books, notes, addBook, deleteBook }}>
+    <BookContext.Provider value={{ books, notes, addBook, deleteBook, updateBook }}>
       {children}
     </BookContext.Provider>
   )

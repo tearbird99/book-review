@@ -59,36 +59,51 @@ export default function LibraryPage() {
               autoFocus
             />
           )}
-          <button
-            onClick={() => {
-              setIsSearchMode(!isSearchMode)
-              if (isSearchMode) {
-                setSearchQuery('')
-              }
-            }}
-            className={`flex h-10 w-10 items-center justify-center rounded-full border transition-all ${
-              isSearchMode
-                ? 'border-brass-2 bg-brass-2/10 text-brass-2'
-                : 'border-brass-2/35 text-ink-soft hover:border-brass-2 hover:text-brass-2'
-            }`}
-            aria-label="검색"
-          >
-            <SearchIcon />
-          </button>
-          <IconButton ariaLabel="주문">
-            <ScrollIcon />
-          </IconButton>
-          <button
-            onClick={() => setIsDeleteMode(!isDeleteMode)}
-            className={`flex h-10 w-10 items-center justify-center rounded-full border transition-all ${
-              isDeleteMode
-                ? 'border-red-500 bg-red-50 text-red-500'
-                : 'border-brass-2/35 text-ink-soft hover:border-brass-2 hover:text-brass-2'
-            }`}
-            aria-label="삭제"
-          >
-            <TrashIcon />
-          </button>
+          <div className="relative group">
+            <button
+              onClick={() => {
+                setIsSearchMode(!isSearchMode)
+                if (isSearchMode) {
+                  setSearchQuery('')
+                }
+              }}
+              className={`flex h-10 w-10 items-center justify-center rounded-full border transition-all ${
+                isSearchMode
+                  ? 'border-brass-2 bg-brass-2/10 text-brass-2'
+                  : 'border-brass-2/35 text-ink-soft hover:border-brass-2 hover:text-brass-2'
+              }`}
+              aria-label="검색"
+            >
+              <SearchIcon />
+            </button>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block whitespace-nowrap rounded bg-ink px-2 py-1 font-korean-serif text-xs text-white">
+              검색
+            </div>
+          </div>
+          <div className="relative group">
+            <IconButton ariaLabel="주문">
+              <ScrollIcon />
+            </IconButton>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block whitespace-nowrap rounded bg-ink px-2 py-1 font-korean-serif text-xs text-white">
+              주문
+            </div>
+          </div>
+          <div className="relative group">
+            <button
+              onClick={() => setIsDeleteMode(!isDeleteMode)}
+              className={`flex h-10 w-10 items-center justify-center rounded-full border transition-all ${
+                isDeleteMode
+                  ? 'border-red-500 bg-red-50 text-red-500'
+                  : 'border-brass-2/35 text-ink-soft hover:border-brass-2 hover:text-brass-2'
+              }`}
+              aria-label="삭제"
+            >
+              <TrashIcon />
+            </button>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block whitespace-nowrap rounded bg-ink px-2 py-1 font-korean-serif text-xs text-white">
+              삭제
+            </div>
+          </div>
         </div>
       </header>
 
