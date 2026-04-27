@@ -27,9 +27,9 @@ async def create_order_zip(order: Order, session: Session) -> io.BytesIO:
         └── <book_id>_<filename>
     """
     # 주문 항목 조회 (position 순으로)
-    order_items = session.exec(
+    order_items = session.execute(
         select(OrderItem).where(OrderItem.order_id == order.id)
-    ).all()
+    ).scalars().all()
     order_items.sort(key=lambda x: x.position)
 
     if not order_items:

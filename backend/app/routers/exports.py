@@ -6,7 +6,7 @@ import io
 
 from ..database import get_session
 from ..models import Order
-# from ..services.export import create_order_zip  # 향후 추가될 서비스
+from ..services.export import create_order_zip
 
 # 라우터 생성
 router = APIRouter()
@@ -31,18 +31,11 @@ async def export_order_zip(
     if not order:
         raise HTTPException(status_code=404, detail="주문을 찾을 수 없습니다")
 
-    # ZIP 생성 (향후 서비스 함수로 이동)
-    # zip_buffer = await create_order_zip(order, session)
+    # ZIP 생성
+    zip_buffer = await create_order_zip(order, session)
 
-    # 현재는 빈 응답 반환 (서비스 구현 후 활성화)
-    return {
-        "message": "ZIP 익스포트는 현재 구현 중입니다",
-        "order_id": order_id
-    }
-
-    # # 최종 구현 (서비스 함수 완성 후)
-    # return StreamingResponse(
-    #     iter([zip_buffer.getvalue()]),
-    #     media_type="application/zip",
-    #     headers={"Content-Disposition": f"attachment; filename=order_{order_id}.zip"}
-    # )
+    return StreamingResponse(
+        iter([zip_buffer.getvalue()]),
+        media_type="application/zip",
+        headers={"Content-Disposition": f"attachment; filename=order_{order_id}.zip"}
+    )
