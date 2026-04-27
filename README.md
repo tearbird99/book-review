@@ -1,51 +1,27 @@
-# book-review
+# 마법사의 서재 (Wizard's Library)
 
-# Python / FastAPI
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-venv/
-env/
-.venv/
-*.egg-info/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
+독서 기록을 남기고, 콘텐츠를 책으로 만드는 서비스
 
-# SQLite (DB 파일은 커밋하지 않음)
-*.db
-*.sqlite
-*.sqlite3
-backend/data/*.db
+## 1. 서비스 소개
 
-# Environment
-.env
-.env.local
-.env.*.local
+(작성 예정)
 
-# IDE
-.vscode/
-.idea/
-*.swp
+## 2. 실행 방법 (Docker)
 
-# OS
-.DS_Store
-Thumbs.db
+(작성 예정)
 
-# Docker
-# docker-compose.override.yml  # 필요시 주석 해제
+## 3. 완성한 레벨
 
-# Build outputs
-frontend/dist/
-backend/dist/
+(작성 예정)
 
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+## 4. 기술 스택 및 아키텍처
 
-# Claude Code (선택)
-.claude/
+(작성 예정)
+
+## 5. AI 도구 사용 내역
+
+(작성 예정)
+
+## 6. 설계 의도
+
+(작성 예정)
