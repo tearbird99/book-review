@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { mockBooks, type ReadStatus } from '../data/mockBooks'
 import { mockNotes } from '../data/mockNotes'
 import BookCard from '../components/BookCard'
+import BookAddModal from '../components/BookAddModal'
 
 const TABS: { key: ReadStatus | 'all'; label: string }[] = [
   { key: 'all', label: '서재 전체' },
@@ -12,6 +13,7 @@ const TABS: { key: ReadStatus | 'all'; label: string }[] = [
 
 export default function LibraryPage() {
   const [active, setActive] = useState<ReadStatus | 'all'>('all')
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   const filtered = active === 'all' ? mockBooks : mockBooks.filter((b) => b.status === active)
 
@@ -92,7 +94,10 @@ export default function LibraryPage() {
         ))}
 
         {/* 새 책 추가 카드 */}
-        <button className="group flex aspect-[2/3] flex-col items-center justify-center rounded-[2px] border-2 border-dashed border-brass-2/50 bg-[#ebe5f8] transition-all hover:border-brass-2/80 hover:bg-[#e0d6f5]">
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="group flex aspect-[2/3] flex-col items-center justify-center rounded-[2px] border-2 border-dashed border-brass-2/50 bg-[#ebe5f8] transition-all hover:border-brass-2/80 hover:bg-[#e0d6f5]"
+        >
           <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-brass-2/60 text-brass-2 transition-colors group-hover:border-brass-2 group-hover:bg-brass-2/10">
             <PlusIcon />
           </div>
@@ -117,6 +122,8 @@ export default function LibraryPage() {
       {/* 독서 기록 히트맵 */}
       <ReadingHeatmap />
 
+      {/* 책 추가 모달 */}
+      <BookAddModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
     </div>
   )
 }
