@@ -16,8 +16,17 @@ export default function LibraryPage() {
   const [active, setActive] = useState<ReadStatus | 'all'>('all')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isDeleteMode, setIsDeleteMode] = useState(false)
+  const [isSearchMode, setIsSearchMode] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
-  const filtered = active === 'all' ? books : books.filter((b) => b.status === active)
+  let filtered = active === 'all' ? books : books.filter((b) => b.status === active)
+  if (isSearchMode && searchQuery.trim()) {
+    const query = searchQuery.toLowerCase()
+    filtered = filtered.filter((b) =>
+      b.title.toLowerCase().includes(query) ||
+      b.author.toLowerCase().includes(query)
+    )
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-12">
@@ -40,9 +49,32 @@ export default function LibraryPage() {
         </div>
 
         <div className="flex items-center gap-3 pt-2">
-          <IconButton ariaLabel="검색">
+          {isSearchMode && (
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="제목 또는 저자 검색..."
+              className="rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+              autoFocus
+            />
+          )}
+          <button
+            onClick={() => {
+              setIsSearchMode(!isSearchMode)
+              if (isSearchMode) {
+                setSearchQuery('')
+              }
+            }}
+            className={`flex h-10 w-10 items-center justify-center rounded-full border transition-all ${
+              isSearchMode
+                ? 'border-brass-2 bg-brass-2/10 text-brass-2'
+                : 'border-brass-2/35 text-ink-soft hover:border-brass-2 hover:text-brass-2'
+            }`}
+            aria-label="검색"
+          >
             <SearchIcon />
-          </IconButton>
+          </button>
           <IconButton ariaLabel="주문">
             <ScrollIcon />
           </IconButton>
@@ -101,7 +133,7 @@ export default function LibraryPage() {
       </div>
 
       {/* 책 그리드 */}
-      <section className="mt-8 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      <section className="mt-8 grid min-h-[1098px] gap-x-6 gap-y-10 grid-cols-2 sm:min-h-[720px] sm:grid-cols-3 md:min-h-[531px] md:grid-cols-4 lg:min-h-[417px] lg:grid-cols-5">
         {filtered.map((book) => (
           <BookCard
             key={book.id}
@@ -112,20 +144,22 @@ export default function LibraryPage() {
         ))}
 
         {/* 새 책 추가 카드 */}
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="group flex aspect-[2/3] flex-col items-center justify-center rounded-[2px] border-2 border-dashed border-brass-2/50 bg-[#ebe5f8] transition-all hover:border-brass-2/80 hover:bg-[#e0d6f5]"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-brass-2/60 text-brass-2 transition-colors group-hover:border-brass-2 group-hover:bg-brass-2/10">
-            <PlusIcon />
-          </div>
-          <span className="mt-3 font-korean-serif text-sm font-medium text-ink-soft group-hover:text-ink">
-            새 책 봉인하기
-          </span>
-          <span className="mt-1 font-display text-[9px] uppercase tracking-[0.3em] text-brass-2/70">
-            Adde Librum
-          </span>
-        </button>
+        {!isSearchMode && !isDeleteMode && (
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="group flex aspect-[2/3] flex-col items-center justify-center rounded-[2px] border-2 border-dashed border-brass-2/50 bg-[#ebe5f8] transition-all hover:border-brass-2/80 hover:bg-[#e0d6f5]"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-brass-2/60 text-brass-2 transition-colors group-hover:border-brass-2 group-hover:bg-brass-2/10">
+              <PlusIcon />
+            </div>
+            <span className="mt-3 font-korean-serif text-sm font-medium text-ink-soft group-hover:text-ink">
+              새 책 봉인하기
+            </span>
+            <span className="mt-1 font-display text-[9px] uppercase tracking-[0.3em] text-brass-2/70">
+              Adde Librum
+            </span>
+          </button>
+        )}
       </section>
 
       {/* 푸터 구분선 */}
