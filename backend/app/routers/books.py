@@ -15,7 +15,7 @@ router = APIRouter()
 @router.get("", response_model=List[BookRead])
 async def get_books(session: Session = Depends(get_session)):
     """모든 책 조회"""
-    books = session.exec(select(Book)).all()
+    books = session.execute(select(Book)).scalars().all()
     return books
 
 # ============================================================================

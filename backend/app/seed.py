@@ -27,7 +27,7 @@ def seed_data():
             return
 
         # ========================================================================
-        # 책 5권 생성
+        # 책 6권 생성
         # ========================================================================
         books_data = [
             {
@@ -68,6 +68,14 @@ def seed_data():
                 "cover_image_url": "/static/covers/little_prince.jpg",
                 "category": "동화",
                 "total_pages": 144,
+                "current_page": 0
+            },
+            {
+                "title": "차라투스트라는 이렇게 말했다",
+                "author": "프리드리히 니체",
+                "cover_image_url": "/static/covers/alchemist.jpg",
+                "category": "철학",
+                "total_pages": 528,
                 "current_page": 0
             },
         ]

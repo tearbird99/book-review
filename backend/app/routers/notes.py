@@ -18,7 +18,7 @@ async def get_notes(
     session: Session = Depends(get_session)
 ):
     """특정 책의 노트 목록 조회"""
-    notes = session.exec(select(Note).where(Note.book_id == book_id)).all()
+    notes = session.execute(select(Note).where(Note.book_id == book_id)).scalars().all()
     return notes
 
 # ============================================================================

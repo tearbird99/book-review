@@ -18,7 +18,7 @@ router = APIRouter()
 @router.get("", response_model=List[OrderRead])
 async def get_orders(session: Session = Depends(get_session)):
     """모든 주문 조회"""
-    orders = session.exec(select(Order)).all()
+    orders = session.execute(select(Order)).scalars().all()
     return orders
 
 # ============================================================================
@@ -126,9 +126,9 @@ async def get_order_items(order_id: int, session: Session = Depends(get_session)
         raise HTTPException(status_code=404, detail="주문을 찾을 수 없습니다")
 
     # position 순서대로 정렬
-    items = session.exec(
+    items = session.execute(
         select(OrderItem).where(OrderItem.order_id == order_id)
-    ).all()
+    ).scalars().all()
     items.sort(key=lambda x: x.position)
 
     return items
