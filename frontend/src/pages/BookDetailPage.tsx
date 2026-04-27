@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import type { ReadStatus, MockBook } from '../data/mockBooks'
+import type { MockBook } from '../data/mockBooks'
+import type { MockNote } from '../data/mockNotes'
 import NoteCard from '../components/NoteCard'
 import Ornament from '../components/Ornament'
+import NoteAddModal from '../components/NoteAddModal'
 import { useBooks } from '../contexts/BookContext'
 
 type Tab = 'notes' | 'info'
@@ -11,11 +13,13 @@ const CATEGORIES = ['소설', '과학', '철학', '동화']
 
 export default function BookDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const { books, notes: allNotes, updateBook } = useBooks()
+  const { books, notes: allNotes, updateBook, moveNote, deleteNote } = useBooks()
   const [activeTab, setActiveTab] = useState<Tab>('notes')
   const [isEditMode, setIsEditMode] = useState(false)
   const [editedBook, setEditedBook] = useState<MockBook | null>(null)
   const [categoryMode, setCategoryMode] = useState<'select' | 'custom'>('select')
+  const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false)
+  const [editingNoteId, setEditingNoteId] = useState<number | null>(null)
 
   const book = books.find((b) => b.id === Number(id))
   const notes = allNotes.filter((n) => n.book_id === Number(id))
@@ -223,8 +227,7 @@ export default function BookDetailPage() {
                 <input
                   type="date"
                   value={notes.length > 0 ? notes[notes.length - 1].read_date : ''}
-                  onChange={(e) => {
-                    const newDate = e.target.value
+                  onChange={() => {
                     // This would update the note's read_date in a real implementation
                   }}
                   className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
@@ -302,7 +305,10 @@ export default function BookDetailPage() {
       </div>
 
       {/* 노트 추가 버튼 */}
-      <button className="mt-8 w-full rounded-[2px] bg-ink py-4 font-korean-serif text-base font-medium tracking-wider text-parchment shadow-[0_4px_16px_-4px_rgba(31,22,51,0.3)] transition-all hover:bg-ink/85 hover:shadow-[0_6px_20px_-4px_rgba(90,63,160,0.3)] active:scale-[0.99]">
+      <button
+        onClick={() => setIsAddNoteModalOpen(true)}
+        className="mt-8 w-full rounded-[2px] bg-ink py-4 font-korean-serif text-base font-medium tracking-wider text-parchment shadow-[0_4px_16px_-4px_rgba(31,22,51,0.3)] transition-all hover:bg-ink/85 hover:shadow-[0_6px_20px_-4px_rgba(90,63,160,0.3)] active:scale-[0.99]"
+      >
         노트 추가하기
       </button>
 
@@ -335,9 +341,20 @@ export default function BookDetailPage() {
         {activeTab === 'notes' ? (
           notes.length > 0 ? (
             <ul className="flex flex-col gap-3">
-              {notes.map((note) => (
+              {notes.map((note, idx) => (
                 <li key={note.id}>
-                  <NoteCard note={note} />
+                  {editingNoteId === note.id ? (
+                    <NoteEditor note={note} onClose={() => setEditingNoteId(null)} />
+                  ) : (
+                    <NoteCard
+                      note={note}
+                      onEdit={setEditingNoteId}
+                      onDelete={(noteId) => deleteNote(noteId, book.id)}
+                      onMove={moveNote}
+                      isFirst={idx === 0}
+                      isLast={idx === notes.length - 1}
+                    />
+                  )}
                 </li>
               ))}
             </ul>
@@ -348,6 +365,17 @@ export default function BookDetailPage() {
           <BookInfoTab book={book} />
         )}
       </div>
+
+      {/* 노트 추가 모달 */}
+      <NoteAddModal
+        bookId={book.id}
+        isOpen={isAddNoteModalOpen}
+        onClose={() => setIsAddNoteModalOpen(false)}
+        onSuccess={() => {
+          setIsAddNoteModalOpen(false)
+          // 노트 목록 새로고침
+        }}
+      />
     </div>
   )
 }
@@ -375,7 +403,7 @@ function EmptyNotes() {
   )
 }
 
-function BookInfoTab({ book }: { book: (typeof mockBooks)[number] }) {
+function BookInfoTab({ book }: { book: MockBook }) {
   return (
     <div className="rounded-sm border border-brass-2/15 bg-white/50 px-6 py-5">
       <dl className="flex flex-col gap-4">
@@ -393,6 +421,60 @@ function BookInfoTab({ book }: { book: (typeof mockBooks)[number] }) {
           </div>
         ))}
       </dl>
+    </div>
+  )
+}
+
+function NoteEditor({ note, onClose }: { note: MockNote; onClose: () => void }) {
+  const [content, setContent] = useState(note.content)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      // TODO: 노트 내용 업데이트
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      onClose()
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <div className="rounded-sm border border-brass-2/30 bg-gradient-to-br from-white to-white/50 px-6 py-5 shadow-[0_2px_12px_-4px_rgba(31,22,51,0.12)]">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-korean-serif text-sm font-semibold text-ink">노트 편집</h3>
+        <button
+          onClick={onClose}
+          className="text-ink-mute hover:text-ink transition-colors"
+        >
+          ✕
+        </button>
+      </div>
+
+      <textarea
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+        style={{ height: '200px', resize: 'vertical' }}
+        placeholder="노트 내용을 입력하세요..."
+      />
+
+      <div className="flex gap-2 mt-4">
+        <button
+          onClick={onClose}
+          className="flex-1 rounded-sm border border-brass-2/25 px-4 py-2 font-korean-serif text-sm font-medium text-ink-mute transition-colors hover:border-brass-2/50 hover:text-ink-soft"
+        >
+          취소
+        </button>
+        <button
+          onClick={handleSave}
+          disabled={isSaving}
+          className="flex-1 rounded-sm bg-brass-2 px-4 py-2 font-korean-serif text-sm font-medium text-white transition-colors hover:bg-brass-2/90 disabled:opacity-50"
+        >
+          {isSaving ? '저장 중...' : '저장'}
+        </button>
+      </div>
     </div>
   )
 }

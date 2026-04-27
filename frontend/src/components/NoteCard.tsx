@@ -2,6 +2,11 @@ import type { MockNote } from '../data/mockNotes'
 
 type Props = {
   note: MockNote
+  onEdit?: (noteId: number) => void
+  onDelete?: (noteId: number) => void
+  onMove?: (noteId: number, direction: 'up' | 'down') => void
+  isFirst?: boolean
+  isLast?: boolean
 }
 
 function formatDate(dateStr: string) {
@@ -9,13 +14,13 @@ function formatDate(dateStr: string) {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`
 }
 
-export default function NoteCard({ note }: Props) {
+export default function NoteCard({ note, onEdit, onDelete, onMove, isFirst = false, isLast = false }: Props) {
   return (
     <article className="group relative flex gap-5 rounded-sm border border-brass-2/15 bg-white/50 px-6 py-5 shadow-[0_2px_12px_-4px_rgba(31,22,51,0.08)] transition-all hover:border-brass-2/30 hover:shadow-[0_4px_20px_-6px_rgba(90,63,160,0.12)]">
       {/* 왼쪽 세로 액센트 바 */}
       <div className="absolute left-0 top-4 bottom-4 w-[2px] rounded-full bg-gradient-to-b from-transparent via-brass-2/40 to-transparent" />
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onEdit?.(note.id)}>
         {/* 날짜 */}
         <time className="font-display text-[10px] uppercase tracking-[0.25em] text-ink-mute">
           {formatDate(note.read_date)}
@@ -27,15 +32,40 @@ export default function NoteCard({ note }: Props) {
         </p>
       </div>
 
-      {/* 편집/삭제 버튼 (뼈대) */}
+      {/* 버튼들 */}
       <div className="flex shrink-0 flex-col items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+        {/* 이동 버튼 */}
+        <div className="flex flex-col gap-0.5">
+          <button
+            onClick={() => onMove?.(note.id, 'up')}
+            disabled={isFirst}
+            aria-label="위로 이동"
+            className="flex h-6 w-6 items-center justify-center rounded text-ink-mute transition-colors disabled:opacity-30 hover:bg-brass-2/10 hover:text-brass-2 disabled:hover:bg-transparent disabled:hover:text-ink-mute"
+          >
+            <ChevronUpIcon />
+          </button>
+          <button
+            onClick={() => onMove?.(note.id, 'down')}
+            disabled={isLast}
+            aria-label="아래로 이동"
+            className="flex h-6 w-6 items-center justify-center rounded text-ink-mute transition-colors disabled:opacity-30 hover:bg-brass-2/10 hover:text-brass-2 disabled:hover:bg-transparent disabled:hover:text-ink-mute"
+          >
+            <ChevronDownIcon />
+          </button>
+        </div>
+
+        {/* 편집 버튼 */}
         <button
+          onClick={() => onEdit?.(note.id)}
           aria-label="편집"
           className="flex h-8 w-8 items-center justify-center rounded-full text-ink-mute transition-colors hover:bg-brass-2/10 hover:text-brass-2"
         >
           <PencilIcon />
         </button>
+
+        {/* 삭제 버튼 */}
         <button
+          onClick={() => onDelete?.(note.id)}
           aria-label="삭제"
           className="flex h-8 w-8 items-center justify-center rounded-full text-ink-mute transition-colors hover:bg-red-100 hover:text-red-500"
         >
@@ -43,6 +73,22 @@ export default function NoteCard({ note }: Props) {
         </button>
       </div>
     </article>
+  )
+}
+
+function ChevronUpIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="18 15 12 9 6 15" />
+    </svg>
+  )
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
   )
 }
 
