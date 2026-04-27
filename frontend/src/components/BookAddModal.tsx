@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { ReadStatus } from '../data/mockBooks'
-import { useBooks, type BookFormData } from '../contexts/BookContext'
+import { useBooks, type BookFormData, type ReadStatus } from '../contexts/BookContext'
 
 const CATEGORIES = ['소설', '과학', '철학', '동화']
 
@@ -9,13 +8,13 @@ const CATEGORIES = ['소설', '과학', '철학', '동화']
 type BookAddFormData = {
   title: string
   author: string
-  totalPages: number
+  total_pages: number
   category: string
-  customCategory?: string
-  status: ReadStatus
-  currentPage?: number
-  startDate?: string
-  endDate?: string
+  custom_category?: string
+  read_status: ReadStatus
+  current_page?: number
+  start_date?: string
+  end_date?: string
   rating?: number
 }
 
@@ -33,9 +32,9 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
   const [form, setForm] = useState<BookAddFormData>({
     title: '',
     author: '',
-    totalPages: 0,
+    total_pages: 0,
     category: '소설',
-    status: 'to_read',
+    read_status: 'to_read',
   })
   const [categoryMode, setCategoryMode] = useState<'select' | 'custom'>('select')
   const [error, setError] = useState<string>('')
@@ -45,24 +44,24 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
     const { name, value } = e.target
     setForm((prev) => ({
       ...prev,
-      [name]: name === 'totalPages' || name === 'currentPage' ? Number(value) : value,
+      [name]: name === 'total_pages' || name === 'current_page' ? Number(value) : value,
     }))
   }
 
   // 읽기 상태 변경: 상태별 추가 필드 초기화
-  const handleStatusChange = (status: ReadStatus) => {
+  const handleStatusChange = (read_status: ReadStatus) => {
     setForm((prev) => ({
       ...prev,
-      status,
-      currentPage: undefined,
-      startDate: undefined,
-      endDate: undefined,
+      read_status,
+      current_page: undefined,
+      start_date: undefined,
+      end_date: undefined,
       rating: undefined,
     }))
   }
 
   // 폼 제출: 검증 → 책 생성 → 상세 페이지 이동
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
@@ -75,28 +74,28 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
       setError('저자를 입력해주세요')
       return
     }
-    if (form.totalPages <= 0) {
+    if (form.total_pages <= 0) {
       setError('전체 페이지 수를 입력해주세요')
       return
     }
 
-    const finalCategory = form.customCategory || form.category
+    const finalCategory = form.custom_category || form.category
     if (!finalCategory.trim()) {
       setError('장르를 선택해주세요')
       return
     }
 
     // 읽는 중/읽은 책: 추가 필수 필드 검증
-    if (form.status !== 'to_read') {
-      if (!form.currentPage || form.currentPage < 0) {
+    if (form.read_status !== 'to_read') {
+      if (!form.current_page || form.current_page < 0) {
         setError('읽은 페이지를 입력해주세요')
         return
       }
-      if (!form.startDate) {
+      if (!form.start_date) {
         setError('독서 시작 날짜를 입력해주세요')
         return
       }
-      if (form.status === 'read' && !form.endDate) {
+      if (form.read_status === 'read' && !form.end_date) {
         setError('독서 종료 날짜를 입력해주세요')
         return
       }
@@ -104,14 +103,21 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
 
     // 최종 제출 데이터 구성
     const submitData: BookFormData = {
-      ...form,
-      category: form.customCategory ? form.category : form.category,
-      customCategory: form.customCategory,
+      title: form.title,
+      author: form.author,
+      total_pages: form.total_pages,
+      category: form.custom_category || form.category,
+      custom_category: form.custom_category,
+      read_status: form.read_status,
+      current_page: form.current_page,
+      start_date: form.start_date,
+      end_date: form.end_date,
+      rating: form.rating,
     }
 
     // 책 생성 후 상세 페이지로 이동
     try {
-      const { bookId } = addBook(submitData)
+      const { bookId } = await addBook(submitData)
       onClose()
       navigate(`/books/${bookId}`)
     } catch (err) {
@@ -175,8 +181,8 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
                 <FormGroup label="전체 페이지" required>
                   <input
                     type="number"
-                    name="totalPages"
-                    value={form.totalPages || ''}
+                    name="total_pages"
+                    value={form.total_pages || ''}
                     onChange={handleInputChange}
                     className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
                     placeholder="페이지 수"
@@ -216,8 +222,8 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
                       <>
                         <input
                           type="text"
-                          name="customCategory"
-                          value={form.customCategory || ''}
+                          name="custom_category"
+                          value={form.custom_category || ''}
                           onChange={handleInputChange}
                           className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
                           placeholder="카테고리"
@@ -226,7 +232,7 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
                           type="button"
                           onClick={() => {
                             setCategoryMode('select')
-                            setForm((prev) => ({ ...prev, customCategory: undefined }))
+                            setForm((prev) => ({ ...prev, custom_category: undefined }))
                           }}
                           className="text-xs text-brass-2 hover:underline"
                         >
@@ -250,7 +256,7 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
                       type="button"
                       onClick={() => handleStatusChange(status)}
                       className={`rounded-sm border-2 px-3 py-2 text-xs font-korean-serif font-medium transition-all ${
-                        form.status === status
+                        form.read_status === status
                           ? 'border-brass-2 bg-brass-2/10 text-brass-2'
                           : 'border-brass-2/25 bg-white/50 text-ink-mute hover:border-brass-2/50'
                       }`}
@@ -262,38 +268,38 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
               </FormGroup>
 
               {/* 조건부 입력: 읽는 중 / 읽은 책 */}
-              {(form.status === 'reading' || form.status === 'read') && (
+              {(form.read_status === 'reading' || form.read_status === 'read') && (
                 <div className="space-y-4 rounded-sm bg-brass-2/5 p-4">
                   <FormGroup label="읽은 페이지" required>
                     <input
                       type="number"
-                      name="currentPage"
-                      value={form.currentPage || ''}
+                      name="current_page"
+                      value={form.current_page || ''}
                       onChange={handleInputChange}
                       className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
                       placeholder="읽은 페이지"
                       min="0"
-                      max={form.totalPages || undefined}
+                      max={form.total_pages || undefined}
                     />
                   </FormGroup>
 
                   <FormGroup label="독서 시작 날짜" required>
                     <input
                       type="date"
-                      name="startDate"
-                      value={form.startDate || ''}
+                      name="start_date"
+                      value={form.start_date || ''}
                       onChange={handleInputChange}
                       className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
                     />
                     <p className="mt-2 text-xs text-ink-mute">(캘린더 디자인은 추후 추가)</p>
                   </FormGroup>
 
-                  {form.status === 'read' && (
+                  {form.read_status === 'read' && (
                     <FormGroup label="독서 종료 날짜" required>
                       <input
                         type="date"
-                        name="endDate"
-                        value={form.endDate || ''}
+                        name="end_date"
+                        value={form.end_date || ''}
                         onChange={handleInputChange}
                         className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
                       />
@@ -310,7 +316,7 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
               )}
 
               {/* 읽을 책일 때 */}
-              {form.status === 'to_read' && (
+              {form.read_status === 'to_read' && (
                 <p className="rounded-sm bg-brass-2/5 p-3 text-xs text-ink-soft">
                   추가 정보 없이 책이 서재에 등록됩니다.
                 </p>

@@ -9,6 +9,13 @@ from sqlmodel import SQLModel, Field, Relationship
 # 1. 책 (Book) 모델
 # ============================================================================
 
+class ReadStatus(str, Enum):
+    """독서 상태 열거형"""
+    TO_READ = "to_read"        # 읽을 예정
+    READING = "reading"        # 읽는 중
+    READ = "read"              # 읽음
+
+
 class BookBase(SQLModel):
     """책 기본 필드 (생성/수정 시 사용)"""
     title: str
@@ -17,6 +24,8 @@ class BookBase(SQLModel):
     category: Optional[str] = None
     total_pages: Optional[int] = None
     current_page: Optional[int] = 0
+    read_status: ReadStatus = ReadStatus.TO_READ
+    rating: Optional[float] = 4.0
 
 
 class Book(BookBase, table=True):
@@ -43,6 +52,8 @@ class BookUpdate(SQLModel):
     category: Optional[str] = None
     total_pages: Optional[int] = None
     current_page: Optional[int] = None
+    read_status: Optional[ReadStatus] = None
+    rating: Optional[float] = None
 
 
 class BookRead(BookBase):

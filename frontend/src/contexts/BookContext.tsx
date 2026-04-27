@@ -1,178 +1,237 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
-import { mockBooks, type MockBook, type ReadStatus } from '../data/mockBooks'
-import { mockNotes, type MockNote } from '../data/mockNotes'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { booksApi, notesApi } from '../lib/api'
+import { ApiBook, ApiNote } from '../types/api'
 
-// Context 타입 정의: 책 데이터와 모든 액션 함수
+export type ReadStatus = 'to_read' | 'reading' | 'read'
+
+// UI용 책 타입 (API 응답 + 계산된 UI 필드)
+export type Book = {
+  id: number
+  title: string
+  author: string
+  read_status: ReadStatus
+  notes: number
+  rating?: number
+  total_pages?: number
+  current_page?: number
+  spineGradient: [string, string]
+  accent: string
+  ornament: 'star' | 'moon' | 'eye' | 'rune' | 'flame'
+  category: string
+  cover_image_url?: string
+  created_at: string
+}
+
+export type MockNote = ApiNote // API와 동일한 형식 사용
+
 type BookContextType = {
-  books: MockBook[]
+  books: Book[]
   notes: MockNote[]
-  addBook: (data: BookFormData) => { bookId: number; noteId: number }
-  addNote: (bookId: number, content: string, readDate: string, rating?: number) => number
-  deleteBook: (bookId: number) => void
-  deleteNote: (noteId: number, bookId: number) => void
-  updateBook: (bookId: number, updates: Partial<MockBook>) => void
+  loading: boolean
+  error: string | null
+  addBook: (data: BookFormData) => Promise<{ bookId: number; noteId: number }>
+  addNote: (bookId: number, content: string, readDate: string, rating?: number) => Promise<number>
+  deleteBook: (bookId: number) => Promise<void>
+  deleteNote: (noteId: number, bookId: number) => Promise<void>
+  updateBook: (bookId: number, updates: Partial<Book>) => Promise<void>
   moveNote: (noteId: number, direction: 'up' | 'down') => void
 }
 
-// 책 추가 양식 데이터 타입
 export type BookFormData = {
   title: string
   author: string
-  totalPages: number
+  total_pages: number
   category: string
-  customCategory?: string
-  status: ReadStatus
-  currentPage?: number
-  startDate?: string
-  endDate?: string
+  custom_category?: string
+  read_status: ReadStatus
+  current_page?: number
+  start_date?: string
+  end_date?: string
   rating?: number
+}
+
+// 카테고리별 UI 스타일 매핑
+const getCategoryStyles = (category: string): {
+  spineGradient: [string, string]
+  accent: string
+  ornament: 'star' | 'moon' | 'eye' | 'rune' | 'flame'
+} => {
+  const styles: Record<string, any> = {
+    '소설': { spineGradient: ['#3b1d1f', '#7a1f24'], accent: '#c9a961', ornament: 'flame' },
+    '과학': { spineGradient: ['#0a0a18', '#1f1f3d'], accent: '#d8c89c', ornament: 'star' },
+    '철학': { spineGradient: ['#1c1a14', '#3a2f1c'], accent: '#c9a961', ornament: 'rune' },
+    '동화': { spineGradient: ['#1f3a2e', '#2d5240'], accent: '#c9a961', ornament: 'moon' },
+    '역사': { spineGradient: ['#2a1a2a', '#4a1f40'], accent: '#d8a87c', ornament: 'eye' },
+    '시': { spineGradient: ['#14142a', '#2a2050'], accent: '#c9a961', ornament: 'eye' },
+  }
+  return styles[category] || { spineGradient: ['#2a2a2a', '#3a3a3a'], accent: '#c9a961', ornament: 'star' }
+}
+
+// ApiBook을 UI용 Book으로 변환
+const enrichBook = (apiBook: ApiBook, notes: MockNote[]): Book => {
+  const bookNotes = notes.filter((n) => n.book_id === apiBook.id)
+  const styles = getCategoryStyles(apiBook.category || '')
+
+  return {
+    id: apiBook.id,
+    title: apiBook.title,
+    author: apiBook.author,
+    read_status: apiBook.read_status as ReadStatus,
+    notes: bookNotes.length,
+    rating: apiBook.rating,
+    total_pages: apiBook.total_pages,
+    current_page: apiBook.current_page,
+    spineGradient: styles.spineGradient,
+    accent: styles.accent,
+    ornament: styles.ornament,
+    category: apiBook.category || '',
+    cover_image_url: apiBook.cover_image_url,
+    created_at: apiBook.created_at,
+  }
 }
 
 const BookContext = createContext<BookContextType | undefined>(undefined)
 
-// 전역 상태 관리 프로바이더: 책과 노트 데이터 관리
 export function BookProvider({ children }: { children: ReactNode }) {
-  // 추가된 책/노트만 관리 (mockData와 분리)
-  const [addedBooks, setAddedBooks] = useState<MockBook[]>([])
-  const [addedNotes, setAddedNotes] = useState<MockNote[]>([])
+  const [apiBooks, setApiBooks] = useState<ApiBook[]>([])
+  const [notes, setNotes] = useState<MockNote[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // 기본 데이터와 추가된 데이터 병합
-  const books = [...mockBooks, ...addedBooks]
-  const notes = [...mockNotes, ...addedNotes]
+  // 초기 데이터 로드
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true)
+        const booksRes = await booksApi.getAll()
+        console.log('Books response:', booksRes)
+        const books: ApiBook[] = Array.isArray(booksRes.data) ? booksRes.data : (Array.isArray(booksRes) ? booksRes : [])
 
-  // 새 책 추가: 책 생성 + 초기 빈 노트 자동 생성
-  const addBook = (data: BookFormData) => {
-    const newBookId = Math.max(...books.map((b) => b.id), 0) + 1
-    const newNoteId = Math.max(...notes.map((n) => n.id), 0) + 1
+        // 모든 책의 노트 병렬로 로드
+        const notesRequests = books.map((book: ApiBook) => notesApi.getByBookId(book.id))
+        const notesResults = await Promise.all(notesRequests)
+        const allNotes = notesResults.flatMap((res: any) => res.data)
 
-    const newBook: MockBook = {
-      id: newBookId,
-      title: data.title,
-      author: data.author,
-      status: data.status,
-      notes: 1,
-      rating: data.status === 'to_read' ? undefined : data.rating,
-      totalPages: data.totalPages,
-      currentPage: data.status === 'to_read' ? 0 : data.currentPage,
-      spineGradient: ['#2a2a2a', '#3a3a3a'],
-      accent: '#c9a961',
-      ornament: 'star',
-      category: data.customCategory || data.category,
+        setApiBooks(books)
+        setNotes(allNotes)
+        setError(null)
+      } catch (err) {
+        console.error('Failed to load books:', err)
+        setError('책 데이터를 불러올 수 없습니다.')
+      } finally {
+        setLoading(false)
+      }
     }
 
-    // 책 생성 시 초기 노트 자동 생성
-    const newNote: MockNote = {
-      id: newNoteId,
-      book_id: newBookId,
-      content: '',
-      rating: 0,
-      read_date: data.startDate || new Date().toISOString().split('T')[0],
-      created_at: new Date().toISOString(),
+    loadData()
+  }, [])
+
+  // UI용 books 계산
+  const books: Book[] = apiBooks.map((apiBook) => enrichBook(apiBook, notes))
+
+  // 책 추가
+  const addBook = async (data: BookFormData): Promise<{ bookId: number; noteId: number }> => {
+    try {
+      const newBook = await booksApi.create({
+        title: data.title,
+        author: data.author,
+        category: data.custom_category || data.category,
+        total_pages: data.total_pages,
+        current_page: data.current_page || 0,
+        read_status: data.read_status,
+      })
+
+      const bookId = newBook.data.id
+
+      // 초기 빈 노트 생성
+      const newNote = await notesApi.create(bookId, {
+        content: '',
+        rating: 3,
+        read_date: data.start_date || new Date().toISOString().split('T')[0],
+      })
+
+      setApiBooks([...apiBooks, newBook.data])
+      setNotes([...notes, newNote.data])
+
+      return { bookId, noteId: newNote.data.id }
+    } catch (err) {
+      console.error('Failed to add book:', err)
+      throw err
     }
-
-    setAddedBooks([...addedBooks, newBook])
-    setAddedNotes([...addedNotes, newNote])
-
-    return { bookId: newBookId, noteId: newNoteId }
   }
 
-  // 새 노트 추가: 빈 노트 생성 + 책의 노트 카운트 증가
-  const addNote = (bookId: number, content: string, readDate: string, rating: number = 0) => {
-    const newNoteId = Math.max(...notes.map((n) => n.id), 0) + 1
+  // 노트 추가
+  const addNote = async (bookId: number, content: string, readDate: string, rating: number = 3): Promise<number> => {
+    try {
+      const newNote = await notesApi.create(bookId, {
+        content,
+        rating: Math.max(1, Math.min(5, rating)), // 1~5 범위로 제한
+        read_date: readDate,
+      })
 
-    const newNote: MockNote = {
-      id: newNoteId,
-      book_id: bookId,
-      content,
-      rating,
-      read_date: readDate,
-      created_at: new Date().toISOString(),
+      setNotes([...notes, newNote.data])
+      return newNote.data.id
+    } catch (err) {
+      console.error('Failed to add note:', err)
+      throw err
     }
-
-    setAddedNotes([...addedNotes, newNote])
-
-    // 책의 노트 개수 증가
-    setAddedBooks(
-      addedBooks.map((b) =>
-        b.id === bookId ? { ...b, notes: b.notes + 1 } : b
-      )
-    )
-
-    return newNoteId
   }
 
-  // 책 삭제: 관련된 모든 노트도 함께 삭제
-  const deleteBook = (bookId: number) => {
-    setAddedBooks(addedBooks.filter((b) => b.id !== bookId))
-    setAddedNotes(addedNotes.filter((n) => n.book_id !== bookId))
+  // 책 삭제
+  const deleteBook = async (bookId: number): Promise<void> => {
+    try {
+      await booksApi.delete(bookId)
+      setApiBooks(apiBooks.filter((b) => b.id !== bookId))
+      setNotes(notes.filter((n) => n.book_id !== bookId))
+    } catch (err) {
+      console.error('Failed to delete book:', err)
+      throw err
+    }
   }
 
-  // 노트 삭제: 책의 노트 카운트 감소
-  const deleteNote = (noteId: number, bookId: number) => {
-    setAddedNotes(addedNotes.filter((n) => n.id !== noteId))
-
-    setAddedBooks(
-      addedBooks.map((b) =>
-        b.id === bookId && b.notes > 0 ? { ...b, notes: b.notes - 1 } : b
-      )
-    )
+  // 노트 삭제
+  const deleteNote = async (noteId: number, _bookId: number): Promise<void> => {
+    try {
+      await notesApi.delete(noteId)
+      setNotes(notes.filter((n) => n.id !== noteId))
+    } catch (err) {
+      console.error('Failed to delete note:', err)
+      throw err
+    }
   }
 
   // 책 정보 업데이트
-  const updateBook = (bookId: number, updates: Partial<MockBook>) => {
-    setAddedBooks(
-      addedBooks.map((b) =>
-        b.id === bookId ? { ...b, ...updates } : b
-      )
-    )
+  const updateBook = async (bookId: number, updates: Partial<Book>): Promise<void> => {
+    try {
+      const updateData: any = {}
+      if (updates.title) updateData.title = updates.title
+      if (updates.author) updateData.author = updates.author
+      if (updates.category) updateData.category = updates.category
+      if (updates.total_pages !== undefined) updateData.total_pages = updates.total_pages
+      if (updates.current_page !== undefined) updateData.current_page = updates.current_page
+      if (updates.read_status) updateData.read_status = updates.read_status
+      if (updates.rating !== undefined) updateData.rating = updates.rating
+
+      const updatedBook = await booksApi.update(bookId, updateData)
+      setApiBooks(apiBooks.map((b) => (b.id === bookId ? updatedBook.data : b)))
+    } catch (err) {
+      console.error('Failed to update book:', err)
+      throw err
+    }
   }
 
-  // 같은 책의 노트들 끼리 순서 변경 (위/아래 이동)
-  const moveNote = (noteId: number, direction: 'up' | 'down') => {
-    const note = notes.find((n) => n.id === noteId)
-    if (!note) return
-
-    // 같은 책의 노트들만 추출
-    const bookNoteIndices = notes
-      .map((n: MockNote, idx: number) => (n.book_id === note.book_id ? idx : -1))
-      .filter((idx: number) => idx !== -1)
-
-    const currentPosition = bookNoteIndices.indexOf(notes.indexOf(note))
-    let newPosition = currentPosition
-
-    if (direction === 'up' && currentPosition > 0) {
-      newPosition = currentPosition - 1
-    } else if (direction === 'down' && currentPosition < bookNoteIndices.length - 1) {
-      newPosition = currentPosition + 1
-    } else {
-      return
-    }
-
-    const currentIdx = bookNoteIndices[currentPosition]
-    const swapIdx = bookNoteIndices[newPosition]
-
-    // addedNotes 배열에서 위치 교환
-    const addedNotesCopy = [...addedNotes]
-    const addedIdx1 = addedNotesCopy.findIndex((n) => n.id === notes[currentIdx].id)
-    const addedIdx2 = addedNotesCopy.findIndex((n) => n.id === notes[swapIdx].id)
-
-    if (addedIdx1 !== -1 && addedIdx2 !== -1) {
-      ;[addedNotesCopy[addedIdx1], addedNotesCopy[addedIdx2]] = [
-        addedNotesCopy[addedIdx2],
-        addedNotesCopy[addedIdx1],
-      ]
-      setAddedNotes(addedNotesCopy)
-    }
+  // 노트 순서 변경 (로컬에서만, moveNote는 현재 사용 안 함)
+  const moveNote = (_noteId: number, _direction: 'up' | 'down') => {
+    // 현재 구현되지 않음 (필요시 position 필드 추가)
   }
 
   return (
-    <BookContext.Provider value={{ books, notes, addBook, addNote, deleteBook, deleteNote, updateBook, moveNote }}>
+    <BookContext.Provider value={{ books, notes, loading, error, addBook, addNote, deleteBook, deleteNote, updateBook, moveNote }}>
       {children}
     </BookContext.Provider>
   )
 }
 
-// 전역 상태 접근 훅
 export function useBooks() {
   const context = useContext(BookContext)
   if (context === undefined) {

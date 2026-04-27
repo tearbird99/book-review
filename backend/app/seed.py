@@ -14,7 +14,7 @@ def seed_data():
     from sqlmodel import SQLModel
     from .database import SessionLocal
 
-    # 테이블 생성
+    # 테이블 생성 (기존 테이블은 유지)
     SQLModel.metadata.create_all(engine)
 
     session = SessionLocal()
@@ -36,7 +36,9 @@ def seed_data():
                 "cover_image_url": "/static/covers/alchemist.jpg",
                 "category": "소설",
                 "total_pages": 256,
-                "current_page": 256
+                "current_page": 256,
+                "read_status": "read",
+                "rating": 5.0
             },
             {
                 "title": "데미안",
@@ -44,7 +46,9 @@ def seed_data():
                 "cover_image_url": "/static/covers/demian.jpg",
                 "category": "소설",
                 "total_pages": 200,
-                "current_page": 200
+                "current_page": 200,
+                "read_status": "read",
+                "rating": 4.0
             },
             {
                 "title": "코스모스",
@@ -52,7 +56,9 @@ def seed_data():
                 "cover_image_url": "/static/covers/cosmos.jpg",
                 "category": "과학",
                 "total_pages": 719,
-                "current_page": 342
+                "current_page": 342,
+                "read_status": "reading",
+                "rating": 5.0
             },
             {
                 "title": "모모",
@@ -60,7 +66,9 @@ def seed_data():
                 "cover_image_url": "/static/covers/momo.jpg",
                 "category": "동화",
                 "total_pages": 480,
-                "current_page": 180
+                "current_page": 180,
+                "read_status": "reading",
+                "rating": 4.0
             },
             {
                 "title": "어린 왕자",
@@ -68,7 +76,9 @@ def seed_data():
                 "cover_image_url": "/static/covers/little_prince.jpg",
                 "category": "동화",
                 "total_pages": 144,
-                "current_page": 0
+                "current_page": 0,
+                "read_status": "to_read",
+                "rating": None
             },
             {
                 "title": "차라투스트라는 이렇게 말했다",
@@ -76,7 +86,9 @@ def seed_data():
                 "cover_image_url": "/static/covers/alchemist.jpg",
                 "category": "철학",
                 "total_pages": 528,
-                "current_page": 0
+                "current_page": 0,
+                "read_status": "to_read",
+                "rating": None
             },
         ]
 
