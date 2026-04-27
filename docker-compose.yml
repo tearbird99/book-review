@@ -19,22 +19,22 @@ services:
       timeout: 5s
       retries: 5
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      target: dev
-    container_name: book-review-frontend
-    ports:
-      - "${APP_PORT:-3000}:5173"
-    volumes:
-      - ./frontend/src:/app/src
-    environment:
-      - VITE_API_BASE_URL=http://localhost:${BACKEND_PORT:-8000}/api
-    depends_on:
-      backend:
-        condition: service_healthy
-    command: npm run dev
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #     target: dev
+  #   container_name: book-review-frontend
+  #   ports:
+  #     - "${APP_PORT:-3000}:5173"
+  #   volumes:
+  #     - ./frontend/src:/app/src
+  #   environment:
+  #     - VITE_API_BASE_URL=http://localhost:${BACKEND_PORT:-8000}/api
+  #   depends_on:
+  #     backend:
+  #       condition: service_healthy
+  #   command: npm run dev
 
 volumes:
   backend_data:

@@ -1,6 +1,7 @@
 # 데이터 모델 정의 (SQLModel + Pydantic)
 from datetime import datetime
 from typing import Optional, List
+from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship
 
 
@@ -32,6 +33,16 @@ class Book(BookBase, table=True):
 class BookCreate(BookBase):
     """책 생성 스키마"""
     pass
+
+
+class BookUpdate(SQLModel):
+    """책 수정 스키마"""
+    title: Optional[str] = None
+    author: Optional[str] = None
+    cover_image_url: Optional[str] = None
+    category: Optional[str] = None
+    total_pages: Optional[int] = None
+    current_page: Optional[int] = None
 
 
 class BookRead(BookBase):
@@ -88,7 +99,7 @@ class NoteRead(NoteBase):
 # 3. 주문 (Order) 모델
 # ============================================================================
 
-class OrderStatus(str):
+class OrderStatus(str, Enum):
     """주문 상태 열거형"""
     PENDING = "pending"        # 대기 중
     PROCESSING = "processing"  # 처리 중

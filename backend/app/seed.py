@@ -21,7 +21,7 @@ def seed_data():
 
     try:
         # books 테이블이 비어있을 때만 시드 데이터 추가 (멱등성)
-        existing_books = session.exec(select(Book)).first()
+        existing_books = session.execute(select(Book)).first()
         if existing_books:
             print("✅ 시드 데이터가 이미 존재합니다. 스킵합니다.")
             return
