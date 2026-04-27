@@ -4,6 +4,7 @@ import BookCard from '../components/BookCard'
 import BookAddModal from '../components/BookAddModal'
 import { useBooks } from '../contexts/BookContext'
 
+// 책 상태별 필터링 탭 (전체, 읽을 책, 읽는 중, 읽은 책)
 const TABS: { key: ReadStatus | 'all'; label: string }[] = [
   { key: 'all', label: '서재 전체' },
   { key: 'to_read', label: '읽을 책' },
@@ -11,6 +12,7 @@ const TABS: { key: ReadStatus | 'all'; label: string }[] = [
   { key: 'read', label: '읽은 책' },
 ]
 
+// 서재 메인 페이지: 책 목록, 필터링, 검색, 삭제 모드, 신규 추가
 export default function LibraryPage() {
   const { books } = useBooks()
   const [active, setActive] = useState<ReadStatus | 'all'>('all')
@@ -19,6 +21,7 @@ export default function LibraryPage() {
   const [isSearchMode, setIsSearchMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
+  // 탭과 검색으로 책 목록 필터링
   let filtered = active === 'all' ? books : books.filter((b) => b.status === active)
   if (isSearchMode && searchQuery.trim()) {
     const query = searchQuery.toLowerCase()
@@ -30,7 +33,7 @@ export default function LibraryPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-12">
-      {/* 상단 브랜딩 */}
+      {/* 헤더: 브랜딩 + 액션 버튼 (검색, 정렬, 삭제 모드) */}
       <header className="mb-12 flex items-start justify-between">
         <div>
           <p className="font-display text-[11px] uppercase tracking-[0.4em] text-brass-2">
@@ -107,7 +110,7 @@ export default function LibraryPage() {
         </div>
       </header>
 
-      {/* 탭 */}
+      {/* 상태별 필터링 탭 */}
       <nav className="border-b border-brass-2/25">
         <ul className="flex gap-8">
           {TABS.map((tab) => {
@@ -131,7 +134,7 @@ export default function LibraryPage() {
         </ul>
       </nav>
 
-      {/* 카운트 + 정렬 */}
+      {/* 책 개수 + 정렬 버튼 */}
       <div className="mt-8 flex items-end justify-between">
         <div>
           <p className="font-display text-xs uppercase tracking-[0.3em] text-brass-2">
@@ -147,7 +150,7 @@ export default function LibraryPage() {
         </button>
       </div>
 
-      {/* 책 그리드 */}
+      {/* 책 카드 그리드 + 신규 추가 버튼 */}
       <section className="mt-8 grid min-h-[1098px] gap-x-6 gap-y-10 grid-cols-2 sm:min-h-[720px] sm:grid-cols-3 md:min-h-[531px] md:grid-cols-4 lg:min-h-[417px] lg:grid-cols-5">
         {filtered.map((book) => (
           <BookCard
@@ -177,7 +180,7 @@ export default function LibraryPage() {
         )}
       </section>
 
-      {/* 푸터 구분선 */}
+      {/* 시각적 구분선 */}
       <div className="mt-24 flex items-center justify-center gap-4 opacity-40">
         <span className="h-px w-16 bg-brass-2" />
         <span className="font-display text-[10px] uppercase tracking-[0.4em] text-brass-2">
@@ -186,15 +189,16 @@ export default function LibraryPage() {
         <span className="h-px w-16 bg-brass-2" />
       </div>
 
-      {/* 독서 기록 히트맵 */}
+      {/* 1년치 독서 활동 히트맵 */}
       <ReadingHeatmap />
 
-      {/* 책 추가 모달 */}
+      {/* 책 추가 폼 모달 */}
       <BookAddModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
     </div>
   )
 }
 
+// 재사용 가능한 아이콘 버튼 컴포넌트
 function IconButton({
   children,
   ariaLabel,
@@ -212,6 +216,7 @@ function IconButton({
   )
 }
 
+// 검색 아이콘
 function SearchIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -221,6 +226,7 @@ function SearchIcon() {
   )
 }
 
+// 정렬/스크롤 아이콘
 function ScrollIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -231,6 +237,7 @@ function ScrollIcon() {
   )
 }
 
+// 신규 추가 버튼 + 아이콘
 function PlusIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
@@ -239,6 +246,7 @@ function PlusIcon() {
   )
 }
 
+// 드롭다운 화살표
 function ChevronDown({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -247,6 +255,7 @@ function ChevronDown({ className }: { className?: string }) {
   )
 }
 
+// 삭제 아이콘
 function TrashIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -258,18 +267,22 @@ function TrashIcon() {
   )
 }
 
+// GitHub 스타일 히트맵: 1년 52주 × 7요일 그리드로 독서 활동 시각화
 function ReadingHeatmap() {
   const { notes } = useBooks()
+  // 날짜별 노트 개수 집계
   const noteCounts: Record<string, number> = {}
   notes.forEach((n) => {
     noteCounts[n.read_date] = (noteCounts[n.read_date] || 0) + 1
   })
 
+  // 과거 52주 범위 계산 (일요일 시작)
   const today = new Date('2026-04-26')
   const startDate = new Date(today)
   startDate.setDate(today.getDate() - 52 * 7)
   startDate.setDate(startDate.getDate() - startDate.getDay())
 
+  // 53주 × 7일 셀 생성
   type Cell = { dateStr: string; count: number; future: boolean }
   const allDates: Cell[] = []
   const cur = new Date(startDate)
@@ -282,17 +295,20 @@ function ReadingHeatmap() {
     cur.setDate(cur.getDate() + 1)
   }
 
+  // 7일 단위로 주(week) 그룹화
   const weeks: Cell[][] = []
   for (let i = 0; i < allDates.length; i += 7) {
     weeks.push(allDates.slice(i, i + 7))
   }
 
+  // 레이아웃 상수
   const CELL = 16
   const GAP = 3
   const COL_W = CELL + GAP
   const LABEL_W = 22
   const FONT = 11
 
+  // 노트 개수에 따른 셀 배경색 결정
   function cellBg(count: number, future: boolean): string {
     if (future) return '#e8e4f0'
     if (count === 0) return '#ddd6f0'
@@ -302,7 +318,7 @@ function ReadingHeatmap() {
     return '#7a5818'
   }
 
-  // 최소 4주 간격으로만 월 라벨 표시 (겹침 방지)
+  // 4주 간격으로만 월 이름 표시 (텍스트 겹침 방지)
   const monthLabels: string[] = []
   let lastLabelWi = -5
   for (let wi = 0; wi < weeks.length; wi++) {
@@ -320,11 +336,12 @@ function ReadingHeatmap() {
   const endYear = today.getFullYear()
   const yearLabel = startYear === endYear ? `${startYear}년` : `${startYear}–${endYear}년`
 
+  // 요일 라벨 (일~토)
   const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
   return (
     <section className="mt-10 pb-20">
-      {/* 헤더: 제목 + 범례 나란히 */}
+      {/* 제목 + 범례 */}
       <div className="mb-5 flex items-end gap-6">
         <div>
           <p className="font-display text-[10px] uppercase tracking-[0.3em] text-brass-2/60">
@@ -334,6 +351,7 @@ function ReadingHeatmap() {
             독서 기록 {yearLabel}
           </h2>
         </div>
+        {/* 강도별 색상 범례 */}
         <div className="flex items-center gap-1.5 pb-0.5">
           <span style={{ fontSize: FONT, color: '#7a708c', fontFamily: 'Cinzel, serif' }}>적음</span>
           {[0, 1, 2, 3, 4].map((i) => (
@@ -346,7 +364,7 @@ function ReadingHeatmap() {
         </div>
       </div>
 
-      {/* 그리드 */}
+      {/* 히트맵 그리드 (가로 스크롤 가능) */}
       <div className="overflow-x-auto">
         <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
           {/* 월 라벨 행 */}
@@ -369,9 +387,10 @@ function ReadingHeatmap() {
             ))}
           </div>
 
-          {/* 요일별 행 — 7개 모두 표시 */}
+          {/* 요일별 행 (일~토 7개 열) */}
           {DAYS.map((day, di) => (
             <div key={di} style={{ display: 'flex', alignItems: 'center', marginBottom: GAP }}>
+              {/* 요일 라벨 */}
               <div
                 style={{
                   width: LABEL_W,
@@ -386,6 +405,7 @@ function ReadingHeatmap() {
               >
                 {day}
               </div>
+              {/* 52주치 셀 */}
               {weeks.map((week, wi) => {
                 const cell = week[di]
                 return (

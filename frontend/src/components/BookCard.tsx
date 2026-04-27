@@ -10,11 +10,13 @@ type Props = {
   onDelete?: () => void
 }
 
+// 책 카드: 표지 디자인 + 상태 표시 + 선택모드 지원
 export default function BookCard({ book, deleteMode = false, onDelete }: Props) {
   const { deleteBook } = useBooks()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [from, to] = book.spineGradient
 
+  // 책 삭제 확인
   const handleConfirmDelete = () => {
     deleteBook(book.id)
     setShowDeleteConfirm(false)
@@ -159,7 +161,7 @@ export default function BookCard({ book, deleteMode = false, onDelete }: Props) 
   )
 }
 
-/* ── 책갈피: 읽는 중 — 실크 리본 끈 ── */
+// 읽는 중 상태일 때 표시되는 실크 리본 책갈피
 function Bookmark({ deleteMode = false }: { deleteMode: boolean }) {
   return (
     <div className={`absolute top-0 right-6 z-20 drop-shadow-[1px_2px_4px_rgba(0,0,0,0.45)] transition-transform duration-500 ${
@@ -174,28 +176,23 @@ function Bookmark({ deleteMode = false }: { deleteMode: boolean }) {
             <stop offset="100%" stopColor="#8a6828" />
           </linearGradient>
         </defs>
-        {/* 리본 몸체 */}
         <rect width="7" height="36" fill="url(#ribbon-sheen)" />
-        {/* 광택 하이라이트 스트라이프 */}
         <rect x="2" y="0" width="1.5" height="36" fill="rgba(255,255,255,0.22)" />
-        {/* 좌우 어두운 엣지 */}
         <line x1="0.3" y1="0" x2="0.3" y2="36" stroke="rgba(0,0,0,0.25)" strokeWidth="0.6" />
         <line x1="6.7" y1="0" x2="6.7" y2="36" stroke="rgba(0,0,0,0.25)" strokeWidth="0.6" />
-        {/* 직물 결 — 가로 위브 라인 */}
         <line x1="0" y1="5" x2="7" y2="5" stroke="rgba(0,0,0,0.07)" strokeWidth="0.6" />
         <line x1="0" y1="10" x2="7" y2="10" stroke="rgba(0,0,0,0.07)" strokeWidth="0.6" />
         <line x1="0" y1="15" x2="7" y2="15" stroke="rgba(0,0,0,0.07)" strokeWidth="0.6" />
         <line x1="0" y1="20" x2="7" y2="20" stroke="rgba(0,0,0,0.07)" strokeWidth="0.6" />
         <line x1="0" y1="25" x2="7" y2="25" stroke="rgba(0,0,0,0.07)" strokeWidth="0.6" />
         <line x1="0" y1="30" x2="7" y2="30" stroke="rgba(0,0,0,0.07)" strokeWidth="0.6" />
-        {/* 하단 경사 컷 (끈 끝 처리) */}
         <polygon points="0,32 7,34 7,36 0,36" fill="rgba(0,0,0,0.15)" />
       </svg>
     </div>
   )
 }
 
-/* ── 인장: 읽은 책 ── */
+// 읽은 책 상태일 때 표시되는 황동 인장 (책 커버 우하단에 띄운 체크마크 스탬프)
 function Seal({ accent }: { accent: string }) {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -205,11 +202,8 @@ function Seal({ accent }: { accent: string }) {
           <stop offset="100%" stopColor={accent} stopOpacity="0.12" />
         </radialGradient>
       </defs>
-      {/* 외곽 원 */}
       <circle cx="15" cy="15" r="13.5" fill="url(#seal-fill)" stroke={accent} strokeWidth="1.2" />
-      {/* 내부 점선 원 */}
       <circle cx="15" cy="15" r="10" fill="none" stroke={accent} strokeWidth="0.7" strokeDasharray="2 1.5" />
-      {/* 체크 마크 */}
       <path d="M9.5 15.5 L13.5 19.5 L21 12" stroke={accent} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )

@@ -1,5 +1,7 @@
+// 독서 상태: 읽을 책, 읽는 중, 읽은 책
 export type ReadStatus = 'to_read' | 'reading' | 'read'
 
+// 책 객체 타입 정의
 export type MockBook = {
   id: number
   title: string
@@ -9,12 +11,13 @@ export type MockBook = {
   rating?: number       // 책 단위 별점 (1-5), 노트가 아닌 책에 귀속
   totalPages?: number
   currentPage?: number
-  spineGradient: [string, string]
-  accent: string
-  ornament: 'star' | 'moon' | 'eye' | 'rune' | 'flame'
-  category: string
+  spineGradient: [string, string]  // 책등 그래디언트 색상 [시작, 끝]
+  accent: string       // 책 표지 액센트 색상
+  ornament: 'star' | 'moon' | 'eye' | 'rune' | 'flame'  // 장식 아이콘
+  category: string     // 책 카테고리 (소설, 과학, 철학 등)
 }
 
+// 초기 모의 데이터: 6권의 샘플 책
 export const mockBooks: MockBook[] = [
   {
     id: 1,

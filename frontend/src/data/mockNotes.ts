@@ -1,12 +1,14 @@
+// 독서 노트 타입 정의
 export type MockNote = {
   id: number
   book_id: number
-  content: string
+  content: string      // 노트 본문 (감상, 인용구 등)
   rating: number
-  read_date: string
-  created_at: string
+  read_date: string    // 독서한 날짜 (YYYY-MM-DD)
+  created_at: string   // 노트 작성 시간 (ISO 8601)
 }
 
+// 초기 모의 데이터: 7개의 샘플 노트
 export const mockNotes: MockNote[] = [
   {
     id: 1,

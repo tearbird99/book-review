@@ -14,6 +14,8 @@ const CATEGORIES = ['소설', '과학', '철학', '동화']
 export default function BookDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { books, notes: allNotes, updateBook, moveNote, deleteNote } = useBooks()
+
+  // UI 상태
   const [activeTab, setActiveTab] = useState<Tab>('notes')
   const [isEditMode, setIsEditMode] = useState(false)
   const [editedBook, setEditedBook] = useState<MockBook | null>(null)
@@ -21,6 +23,7 @@ export default function BookDetailPage() {
   const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false)
   const [editingNoteId, setEditingNoteId] = useState<number | null>(null)
 
+  // URL에서 책 ID 추출, 현재 책만 필터링
   const book = books.find((b) => b.id === Number(id))
   const notes = allNotes.filter((n) => n.book_id === Number(id))
 
@@ -32,18 +35,22 @@ export default function BookDetailPage() {
     )
   }
 
+  // 편집 중이면 임시 데이터, 아니면 원본 데이터 표시
   const displayBook = isEditMode && editedBook ? editedBook : book
   const { totalPages = 0, currentPage = 0 } = displayBook
+  // 읽은 페이지 진행률 계산
   const progress = totalPages > 0 ? Math.round((currentPage / totalPages) * 100) : 0
 
   const [from, to] = book.spineGradient
 
+  // 책 정보 저장
   const handleSaveEdit = () => {
     if (!editedBook) return
     updateBook(book.id, editedBook)
     setIsEditMode(false)
   }
 
+  // 편집 취소
   const handleCancelEdit = () => {
     setIsEditMode(false)
     setEditedBook(null)
@@ -380,8 +387,7 @@ export default function BookDetailPage() {
   )
 }
 
-/* ── 서브 컴포넌트들 ── */
-
+// 책 정보 요약 배지 (노트 개수, 별점, 최근 독서일)
 function StatBadge({ label, value }: { label: string; value: string }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-brass-2/25 bg-white/60 px-3 py-1">
@@ -391,6 +397,7 @@ function StatBadge({ label, value }: { label: string; value: string }) {
   )
 }
 
+// 노트가 없을 때 표시하는 빈 상태 UI
 function EmptyNotes() {
   return (
     <div className="flex flex-col items-center py-20 text-center">
@@ -403,6 +410,7 @@ function EmptyNotes() {
   )
 }
 
+// 책 정보 탭 (제목, 저자, 분류, 등록일)
 function BookInfoTab({ book }: { book: MockBook }) {
   return (
     <div className="rounded-sm border border-brass-2/15 bg-white/50 px-6 py-5">
@@ -425,6 +433,7 @@ function BookInfoTab({ book }: { book: MockBook }) {
   )
 }
 
+// 노트 내용 편집 모드
 function NoteEditor({ note, onClose }: { note: MockNote; onClose: () => void }) {
   const [content, setContent] = useState(note.content)
   const [isSaving, setIsSaving] = useState(false)
@@ -432,7 +441,7 @@ function NoteEditor({ note, onClose }: { note: MockNote; onClose: () => void }) 
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      // TODO: 노트 내용 업데이트
+      // TODO: 노트 내용 업데이트 - updateNote 함수 구현 필요
       await new Promise((resolve) => setTimeout(resolve, 500))
       onClose()
     } finally {
@@ -479,12 +488,12 @@ function NoteEditor({ note, onClose }: { note: MockNote; onClose: () => void }) 
   )
 }
 
-/* ── 상태 라벨 (BookDetailPage 전용) ── */
+// 책 읽음 상태 라벨 (읽을 책 / 읽는 중 / 읽은 책)
 function StatusLabel({ status }: { status: string }) {
   const labelMap: Record<string, string> = {
     to_read: '읽을 책',
-    reading:  '읽는 중',
-    read:     '읽은 책',
+    reading: '읽는 중',
+    read: '읽은 책',
   }
   return (
     <span className="rounded-full border border-brass-2/50 bg-brass-2/8 px-2.5 py-0.5 font-korean-serif text-[11px] text-brass-2">
@@ -493,7 +502,7 @@ function StatusLabel({ status }: { status: string }) {
   )
 }
 
-/* ── 책갈피: 읽는 중 (상세 페이지 미니 표지용) ── */
+// 책갈피 - 읽는 중 상태에 표시 (상세 페이지 미니 표지용)
 function DetailBookmark() {
   return (
     <div className="absolute top-0 right-6 z-20 drop-shadow-[1px_2px_5px_rgba(0,0,0,0.5)]">
@@ -523,7 +532,7 @@ function DetailBookmark() {
   )
 }
 
-/* ── 인장: 읽은 책 (상세 페이지용) ── */
+// 인장 - 읽은 책 상태에 표시 (상세 페이지용)
 function DetailSeal({ accent }: { accent: string }) {
   return (
     <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -566,9 +575,11 @@ function PencilIcon() {
   )
 }
 
+// 별점 평가 컴포넌트 (0.5 단위로 선택 가능)
 function StarRating({ value, onChange }: { value: number; onChange: (val: number) => void }) {
   const [hoveredRating, setHoveredRating] = useState<number | null>(null)
 
+  // 별의 왼쪽/오른쪽 절반으로 0.5 단위 선택
   const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>, starIndex: number) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
@@ -577,6 +588,7 @@ function StarRating({ value, onChange }: { value: number; onChange: (val: number
     setHoveredRating(rating)
   }
 
+  // 별 클릭 시 별점 저장
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>, starIndex: number) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
@@ -585,6 +597,7 @@ function StarRating({ value, onChange }: { value: number; onChange: (val: number
     onChange(rating)
   }
 
+  // 마우스 호버 시 미리보기, 아니면 저장된 값 표시
   const displayRating = hoveredRating !== null ? hoveredRating : value
 
   return (

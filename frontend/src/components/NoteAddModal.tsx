@@ -10,6 +10,7 @@ type Props = {
   onSuccess?: () => void
 }
 
+// 노트 종류별 메타데이터 (레이블, 아이콘)
 const NOTE_TYPES = [
   { id: 'text', label: '감상', icon: '📝' },
   { id: 'quote', label: '인용구', icon: '💬' },
@@ -19,12 +20,14 @@ const NOTE_TYPES = [
   { id: 'relationship', label: '인물관계도', icon: '👥' },
 ]
 
+// 노트 추가 팝업: 종류와 작성 날짜만 선택하고 빈 노트 생성
 export default function NoteAddModal({ bookId, isOpen, onClose, onSuccess }: Props) {
   const { addNote } = useBooks()
   const [noteType, setNoteType] = useState<NoteType>('text')
   const [readDate, setReadDate] = useState(new Date().toISOString().split('T')[0])
   const [isLoading, setIsLoading] = useState(false)
 
+  // 모달 닫을 때 폼 초기화
   useEffect(() => {
     if (!isOpen) {
       setNoteType('text')
@@ -34,6 +37,7 @@ export default function NoteAddModal({ bookId, isOpen, onClose, onSuccess }: Pro
 
   if (!isOpen) return null
 
+  // 빈 노트 생성 후 상세 페이지에서 내용 편집
   const handleAdd = async () => {
     setIsLoading(true)
     try {
@@ -125,6 +129,7 @@ export default function NoteAddModal({ bookId, isOpen, onClose, onSuccess }: Pro
   )
 }
 
+// 닫기 버튼 아이콘
 function XIcon() {
   return (
     <svg

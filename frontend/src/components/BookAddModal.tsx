@@ -5,6 +5,7 @@ import { useBooks, type BookFormData } from '../contexts/BookContext'
 
 const CATEGORIES = ['소설', '과학', '철학', '동화']
 
+// 책 추가 폼의 지역 상태 타입 (폼 입력용)
 type BookAddFormData = {
   title: string
   author: string
@@ -23,9 +24,12 @@ type Props = {
   onClose: () => void
 }
 
+// 책 추가 팝업: 상태 선택에 따라 조건부 필드 표시
 export default function BookAddModal({ isOpen, onClose }: Props) {
   const navigate = useNavigate()
   const { addBook } = useBooks()
+
+  // 폼 상태
   const [form, setForm] = useState<BookAddFormData>({
     title: '',
     author: '',
@@ -36,6 +40,7 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
   const [categoryMode, setCategoryMode] = useState<'select' | 'custom'>('select')
   const [error, setError] = useState<string>('')
 
+  // 숫자 필드는 Number로 변환
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setForm((prev) => ({
@@ -44,6 +49,7 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
     }))
   }
 
+  // 읽기 상태 변경: 상태별 추가 필드 초기화
   const handleStatusChange = (status: ReadStatus) => {
     setForm((prev) => ({
       ...prev,
@@ -55,11 +61,12 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
     }))
   }
 
+  // 폼 제출: 검증 → 책 생성 → 상세 페이지 이동
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
-    // 검증: 필수 입력 확인 (별점 제외)
+    // 필수 필드 검증
     if (!form.title.trim()) {
       setError('제목을 입력해주세요')
       return
@@ -79,7 +86,7 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
       return
     }
 
-    // 읽는 중 / 읽은 책 상태의 추가 검증
+    // 읽는 중/읽은 책: 추가 필수 필드 검증
     if (form.status !== 'to_read') {
       if (!form.currentPage || form.currentPage < 0) {
         setError('읽은 페이지를 입력해주세요')
@@ -95,14 +102,14 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
       }
     }
 
-    // 폼 데이터 최종 정리
+    // 최종 제출 데이터 구성
     const submitData: BookFormData = {
       ...form,
       category: form.customCategory ? form.category : form.category,
       customCategory: form.customCategory,
     }
 
-    // 책 및 노트 생성
+    // 책 생성 후 상세 페이지로 이동
     try {
       const { bookId } = addBook(submitData)
       onClose()
@@ -333,9 +340,11 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
   )
 }
 
+// 별점 평가 컴포넌트 (0.5 단위로 선택 가능)
 function StarRating({ value, onChange }: { value: number; onChange: (val: number) => void }) {
   const [hoveredRating, setHoveredRating] = useState<number | null>(null)
 
+  // 별의 왼쪽/오른쪽 절반으로 0.5 단위 선택
   const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>, starIndex: number) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
@@ -344,6 +353,7 @@ function StarRating({ value, onChange }: { value: number; onChange: (val: number
     setHoveredRating(rating)
   }
 
+  // 별 클릭 시 별점 저장
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>, starIndex: number) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
@@ -352,6 +362,7 @@ function StarRating({ value, onChange }: { value: number; onChange: (val: number
     onChange(rating)
   }
 
+  // 마우스 호버 시 미리보기, 아니면 저장된 값 표시
   const displayRating = hoveredRating !== null ? hoveredRating : value
 
   return (
@@ -409,6 +420,7 @@ function StarRating({ value, onChange }: { value: number; onChange: (val: number
   )
 }
 
+// 폼 필드 래퍼: 라벨 + 필수 표시
 function FormGroup({
   label,
   required,
@@ -429,6 +441,7 @@ function FormGroup({
   )
 }
 
+// 읽기 상태를 한글 라벨로 변환
 function statusLabel(status: ReadStatus): string {
   const map: Record<ReadStatus, string> = {
     to_read: '읽을 책',
@@ -438,6 +451,7 @@ function statusLabel(status: ReadStatus): string {
   return map[status]
 }
 
+// 닫기 버튼 아이콘
 function XIcon() {
   return (
     <svg
