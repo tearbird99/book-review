@@ -7,6 +7,8 @@ import os
 
 # 모듈 임포트
 from .database import init_db
+from .seed import seed_data
+from .routers import books, notes, orders, exports
 
 # FastAPI 앱 인스턴스 생성
 app = FastAPI(
@@ -34,22 +36,22 @@ if static_dir.exists():
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # ============================================================================
-# 라우터 등록 (향후 추가될 예정)
+# 라우터 등록
 # ============================================================================
-# from .routers import books, notes, orders, exports
-# app.include_router(books.router, prefix="/api/books", tags=["Books"])
-# app.include_router(notes.router, prefix="/api/notes", tags=["Notes"])
-# app.include_router(orders.router, prefix="/api/orders", tags=["Orders"])
-# app.include_router(exports.router, prefix="/api/exports", tags=["Exports"])
+app.include_router(books.router, prefix="/api/books", tags=["Books"])
+app.include_router(notes.router, prefix="/api/notes", tags=["Notes"])
+app.include_router(orders.router, prefix="/api/orders", tags=["Orders"])
+app.include_router(exports.router, prefix="/api/exports", tags=["Exports"])
 
 # ============================================================================
 # 앱 시작 이벤트
 # ============================================================================
 @app.on_event("startup")
 async def startup_event():
-    """앱 시작 시 DB 테이블 생성"""
+    """앱 시작 시 DB 초기화 + 시드 데이터 생성"""
     init_db()
-    print("✅ 데이터베이스 초기화 완료")
+    seed_data()
+    print("✅ 앱 시작 완료")
 
 # ============================================================================
 # 헬스 체크 엔드포인트
