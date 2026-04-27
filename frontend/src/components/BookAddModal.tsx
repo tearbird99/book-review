@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { ReadStatus } from '../data/mockBooks'
+import { useBooks, type BookFormData } from '../contexts/BookContext'
 
 const CATEGORIES = ['소설', '과학', '철학', '동화']
 
@@ -22,6 +24,8 @@ type Props = {
 }
 
 export default function BookAddModal({ isOpen, onClose }: Props) {
+  const navigate = useNavigate()
+  const { addBook } = useBooks()
   const [form, setForm] = useState<BookAddFormData>({
     title: '',
     author: '',
@@ -29,8 +33,8 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
     category: '소설',
     status: 'to_read',
   })
-
   const [categoryMode, setCategoryMode] = useState<'select' | 'custom'>('select')
+  const [error, setError] = useState<string>('')
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -53,9 +57,59 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: 폼 검증 및 제출 로직
-    console.log('Submit:', form)
-    onClose()
+    setError('')
+
+    // 검증: 필수 입력 확인 (별점 제외)
+    if (!form.title.trim()) {
+      setError('제목을 입력해주세요')
+      return
+    }
+    if (!form.author.trim()) {
+      setError('저자를 입력해주세요')
+      return
+    }
+    if (form.totalPages <= 0) {
+      setError('전체 페이지 수를 입력해주세요')
+      return
+    }
+
+    const finalCategory = form.customCategory || form.category
+    if (!finalCategory.trim()) {
+      setError('장르를 선택해주세요')
+      return
+    }
+
+    // 읽는 중 / 읽은 책 상태의 추가 검증
+    if (form.status !== 'to_read') {
+      if (!form.currentPage || form.currentPage < 0) {
+        setError('읽은 페이지를 입력해주세요')
+        return
+      }
+      if (!form.startDate) {
+        setError('독서 시작 날짜를 입력해주세요')
+        return
+      }
+      if (form.status === 'read' && !form.endDate) {
+        setError('독서 종료 날짜를 입력해주세요')
+        return
+      }
+    }
+
+    // 폼 데이터 최종 정리
+    const submitData: BookFormData = {
+      ...form,
+      category: form.customCategory ? form.category : form.category,
+      customCategory: form.customCategory,
+    }
+
+    // 책 및 노트 생성
+    try {
+      const { bookId } = addBook(submitData)
+      onClose()
+      navigate(`/books/${bookId}`)
+    } catch (err) {
+      setError('책 추가 중 오류가 발생했습니다')
+    }
   }
 
   if (!isOpen) return null
@@ -79,6 +133,12 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
         <div className="flex flex-col overflow-y-auto" style={{ maxHeight: '90vh' }}>
           <div className="px-6 pt-6 pb-6">
             <h2 className="font-korean-serif text-lg font-semibold text-ink">새 책 추가하기</h2>
+
+            {error && (
+              <div className="mt-4 rounded-sm border border-red-300 bg-red-50 px-4 py-3">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-5">
               {/* 공통 입력: 제목, 저자, 페이지 */}

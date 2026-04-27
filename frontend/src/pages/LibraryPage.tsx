@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { mockBooks, type ReadStatus } from '../data/mockBooks'
-import { mockNotes } from '../data/mockNotes'
+import { type ReadStatus } from '../data/mockBooks'
 import BookCard from '../components/BookCard'
 import BookAddModal from '../components/BookAddModal'
+import { useBooks } from '../contexts/BookContext'
 
 const TABS: { key: ReadStatus | 'all'; label: string }[] = [
   { key: 'all', label: '서재 전체' },
@@ -12,10 +12,12 @@ const TABS: { key: ReadStatus | 'all'; label: string }[] = [
 ]
 
 export default function LibraryPage() {
+  const { books } = useBooks()
   const [active, setActive] = useState<ReadStatus | 'all'>('all')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isDeleteMode, setIsDeleteMode] = useState(false)
 
-  const filtered = active === 'all' ? mockBooks : mockBooks.filter((b) => b.status === active)
+  const filtered = active === 'all' ? books : books.filter((b) => b.status === active)
 
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-12">
@@ -44,6 +46,17 @@ export default function LibraryPage() {
           <IconButton ariaLabel="주문">
             <ScrollIcon />
           </IconButton>
+          <button
+            onClick={() => setIsDeleteMode(!isDeleteMode)}
+            className={`flex h-10 w-10 items-center justify-center rounded-full border transition-all ${
+              isDeleteMode
+                ? 'border-red-500 bg-red-50 text-red-500'
+                : 'border-brass-2/35 text-ink-soft hover:border-brass-2 hover:text-brass-2'
+            }`}
+            aria-label="삭제"
+          >
+            <TrashIcon />
+          </button>
         </div>
       </header>
 
@@ -90,7 +103,12 @@ export default function LibraryPage() {
       {/* 책 그리드 */}
       <section className="mt-8 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {filtered.map((book) => (
-          <BookCard key={book.id} book={book} />
+          <BookCard
+            key={book.id}
+            book={book}
+            deleteMode={isDeleteMode}
+            onDelete={() => setIsDeleteMode(false)}
+          />
         ))}
 
         {/* 새 책 추가 카드 */}
@@ -180,9 +198,21 @@ function ChevronDown({ className }: { className?: string }) {
   )
 }
 
+function TrashIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6M14 11v6" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    </svg>
+  )
+}
+
 function ReadingHeatmap() {
+  const { notes } = useBooks()
   const noteCounts: Record<string, number> = {}
-  mockNotes.forEach((n) => {
+  notes.forEach((n) => {
     noteCounts[n.read_date] = (noteCounts[n.read_date] || 0) + 1
   })
 

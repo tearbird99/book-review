@@ -1,18 +1,19 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { mockBooks, type ReadStatus } from '../data/mockBooks'
-import { mockNotes } from '../data/mockNotes'
+import type { ReadStatus } from '../data/mockBooks'
 import NoteCard from '../components/NoteCard'
 import Ornament from '../components/Ornament'
+import { useBooks } from '../contexts/BookContext'
 
 type Tab = 'notes' | 'info'
 
 export default function BookDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const { books, notes: allNotes } = useBooks()
   const [activeTab, setActiveTab] = useState<Tab>('notes')
 
-  const book = mockBooks.find((b) => b.id === Number(id))
-  const notes = mockNotes.filter((n) => n.book_id === Number(id))
+  const book = books.find((b) => b.id === Number(id))
+  const notes = allNotes.filter((n) => n.book_id === Number(id))
 
   if (!book) {
     return (
