@@ -143,6 +143,7 @@ export function BookProvider({ children }: { children: ReactNode }) {
         total_pages: data.total_pages,
         current_page: data.current_page || 0,
         read_status: data.read_status,
+        rating: data.read_status === 'to_read' ? null : data.rating,
       })
 
       const bookId = newBook.data.id
