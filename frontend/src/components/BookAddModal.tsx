@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBooks, type BookFormData, type ReadStatus } from '../contexts/BookContext'
 
@@ -21,10 +21,11 @@ type BookAddFormData = {
 type Props = {
   isOpen: boolean
   onClose: () => void
+  defaultStatus?: ReadStatus
 }
 
 // 책 추가 팝업: 상태 선택에 따라 조건부 필드 표시
-export default function BookAddModal({ isOpen, onClose }: Props) {
+export default function BookAddModal({ isOpen, onClose, defaultStatus = 'to_read' }: Props) {
   const navigate = useNavigate()
   const { addBook } = useBooks()
 
@@ -34,10 +35,25 @@ export default function BookAddModal({ isOpen, onClose }: Props) {
     author: '',
     total_pages: 0,
     category: '소설',
-    read_status: 'to_read',
+    read_status: defaultStatus,
   })
   const [categoryMode, setCategoryMode] = useState<'select' | 'custom'>('select')
   const [error, setError] = useState<string>('')
+
+  // 모달이 열릴 때마다 폼을 defaultStatus로 리셋
+  useEffect(() => {
+    if (isOpen) {
+      setForm({
+        title: '',
+        author: '',
+        total_pages: 0,
+        category: '소설',
+        read_status: defaultStatus,
+      })
+      setError('')
+      setCategoryMode('select')
+    }
+  }, [isOpen, defaultStatus])
 
   // 숫자 필드는 Number로 변환
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

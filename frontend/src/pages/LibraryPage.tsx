@@ -11,14 +11,24 @@ const TABS: { key: ReadStatus | 'all'; label: string }[] = [
   { key: 'read', label: '읽은 책' },
 ]
 
+type SortType = 'recent' | 'rating' | 'progress'
+
+const SORT_OPTIONS: { key: SortType; label: string }[] = [
+  { key: 'recent', label: '최근 추가 순' },
+  { key: 'rating', label: '별점 순' },
+  { key: 'progress', label: '독서 진행률 순' },
+]
+
 // 서재 메인 페이지: 책 목록, 필터링, 검색, 삭제 모드, 신규 추가
 export default function LibraryPage() {
   const { books } = useBooks()
   const [active, setActive] = useState<ReadStatus | 'all'>('all')
+  const [sortBy, setSortBy] = useState<SortType>('recent')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isDeleteMode, setIsDeleteMode] = useState(false)
   const [isSearchMode, setIsSearchMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSortOpen, setIsSortOpen] = useState(false)
 
   // 탭과 검색으로 책 목록 필터링
   let filtered = active === 'all' ? books : books.filter((b) => b.read_status === active)
@@ -29,6 +39,28 @@ export default function LibraryPage() {
       b.author.toLowerCase().includes(query)
     )
   }
+
+  // 정렬 적용
+  filtered = [...filtered].sort((a, b) => {
+    if (sortBy === 'rating') {
+      // 별점 순: 읽을 책 제외, 별점 높은 순
+      const aHasRating = a.read_status !== 'to_read' && a.rating != null
+      const bHasRating = b.read_status !== 'to_read' && b.rating != null
+
+      if (!aHasRating && !bHasRating) return 0
+      if (!aHasRating) return 1
+      if (!bHasRating) return -1
+      return (b.rating || 0) - (a.rating || 0)
+    } else if (sortBy === 'progress') {
+      // 독서 진행률 순: 높은 순
+      const aProgress = a.total_pages ? a.current_page! / a.total_pages : 0
+      const bProgress = b.total_pages ? b.current_page! / b.total_pages : 0
+      return bProgress - aProgress
+    } else {
+      // 최근 추가 순: created_at DESC
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    }
+  })
 
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-12">
@@ -143,10 +175,35 @@ export default function LibraryPage() {
             서재에 꽂힌 {filtered.length}권
           </p>
         </div>
-        <button className="group flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-ink-mute hover:text-ink-soft">
-          <span>최근 추가 순</span>
-          <ChevronDown className="h-3 w-3 transition-transform group-hover:translate-y-0.5" />
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setIsSortOpen(!isSortOpen)}
+            className="group flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-ink-mute hover:text-ink-soft transition-colors"
+          >
+            <span>{SORT_OPTIONS.find(o => o.key === sortBy)?.label}</span>
+            <ChevronDown className={`h-3 w-3 transition-transform ${isSortOpen ? 'rotate-180' : ''}`} />
+          </button>
+          {isSortOpen && (
+            <div className="absolute right-0 mt-2 rounded-sm border border-brass-2/25 bg-white shadow-lg z-10 min-w-[150px]">
+              {SORT_OPTIONS.map((option) => (
+                <button
+                  key={option.key}
+                  onClick={() => {
+                    setSortBy(option.key)
+                    setIsSortOpen(false)
+                  }}
+                  className={`block w-full px-4 py-2.5 text-left text-xs font-korean-serif transition-colors ${
+                    sortBy === option.key
+                      ? 'bg-brass-2/10 text-brass-2'
+                      : 'text-ink-mute hover:bg-brass-2/5 hover:text-ink-soft'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 책 카드 그리드 + 신규 추가 버튼 */}
@@ -192,7 +249,11 @@ export default function LibraryPage() {
       <ReadingHeatmap />
 
       {/* 책 추가 폼 모달 */}
-      <BookAddModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
+      <BookAddModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        defaultStatus={active === 'all' ? 'to_read' : active}
+      />
     </div>
   )
 }
