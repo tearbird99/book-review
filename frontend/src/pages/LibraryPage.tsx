@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { type ReadStatus } from '../data/mockBooks'
+import { type ReadStatus, useBooks } from '../contexts/BookContext'
 import BookCard from '../components/BookCard'
 import BookAddModal from '../components/BookAddModal'
-import { useBooks } from '../contexts/BookContext'
 
 // 책 상태별 필터링 탭 (전체, 읽을 책, 읽는 중, 읽은 책)
 const TABS: { key: ReadStatus | 'all'; label: string }[] = [
@@ -22,7 +21,7 @@ export default function LibraryPage() {
   const [searchQuery, setSearchQuery] = useState('')
 
   // 탭과 검색으로 책 목록 필터링
-  let filtered = active === 'all' ? books : books.filter((b) => b.status === active)
+  let filtered = active === 'all' ? books : books.filter((b) => b.read_status === active)
   if (isSearchMode && searchQuery.trim()) {
     const query = searchQuery.toLowerCase()
     filtered = filtered.filter((b) =>
