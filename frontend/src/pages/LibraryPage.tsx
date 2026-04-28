@@ -337,7 +337,7 @@ function ReadingHeatmap() {
   })
 
   // 과거 52주 범위 계산 (일요일 시작)
-  const today = new Date('2026-04-26')
+  const today = new Date()
   const startDate = new Date(today)
   startDate.setDate(today.getDate() - 52 * 7)
   startDate.setDate(startDate.getDate() - startDate.getDay())

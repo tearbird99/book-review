@@ -15,7 +15,6 @@ const NOTE_TYPES = [
   { id: 'text', label: '감상', icon: '📝' },
   { id: 'quote', label: '인용구', icon: '💬' },
   { id: 'table', label: '표', icon: '📊' },
-  { id: 'diagram', label: '다이어그램', icon: '📐' },
   { id: 'mindmap', label: '마인드맵', icon: '🧠' },
   { id: 'relationship', label: '인물관계도', icon: '👥' },
 ]

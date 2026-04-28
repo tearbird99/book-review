@@ -546,6 +546,7 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
 
   const [noteContent, setNoteContent] = useState(noteData.content || '')
   const [notePage, setNotePage] = useState<number | null>(noteData.page || null)
+  const [readDate, setReadDate] = useState(note.read_date)
   const [tableRows, setTableRows] = useState<string[][]>(() => {
     if (noteData.type === 'table' && Array.isArray(noteData.content)) {
       return noteData.content
@@ -553,6 +554,11 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
     return [['', ''], ['', '']]
   })
   const [isSaving, setIsSaving] = useState(false)
+
+  // 오늘 날짜 (max date)
+  const today = new Date()
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -577,7 +583,7 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
       }
 
       console.log('저장 시도:', saveContent)
-      await onUpdate(note.id, saveContent, note.rating, note.read_date)
+      await onUpdate(note.id, saveContent, note.rating, readDate)
       console.log('저장 완료')
       onClose()
     } catch (err) {
@@ -603,6 +609,19 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
         >
           ✕
         </button>
+      </div>
+
+      <div className="mb-3">
+        <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute mb-2">
+          작성 날짜
+        </label>
+        <input
+          type="date"
+          value={readDate}
+          onChange={(e) => setReadDate(e.target.value)}
+          max={todayStr}
+          className="w-full rounded-sm border border-slate-400 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+        />
       </div>
 
       <textarea

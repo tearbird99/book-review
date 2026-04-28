@@ -9,7 +9,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@excalidraw/excalidraw": "^0.18.1",
     "axios": "^1.6.2",
     "mermaid": "^11.14.0",
     "react": "^18.3.1",
