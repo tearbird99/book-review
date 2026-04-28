@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useBooks, type Book } from '../contexts/BookContext'
 import type { ApiNote } from '../types/api'
@@ -23,6 +23,7 @@ export default function BookDetailPage() {
   const [editingNoteId, setEditingNoteId] = useState<number | null>(null)
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null)
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // URL에서 책 ID 추출, 현재 책만 필터링
   const book = books.find((b) => b.id === Number(id))
@@ -148,12 +149,16 @@ export default function BookDetailPage() {
             {/* 편집 모드에서 카메라 오버레이 */}
             {isEditMode && (
               <>
-                <label htmlFor="cover-image-input" className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center bg-black/50 text-white hover:bg-black/70 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center bg-black/50 text-white hover:bg-black/70 transition-colors"
+                >
                   <span className="text-2xl">📷</span>
                   <span className="mt-2 text-xs font-korean-serif">표지 변경</span>
-                </label>
+                </button>
                 <input
-                  id="cover-image-input"
+                  ref={fileInputRef}
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   className="hidden"

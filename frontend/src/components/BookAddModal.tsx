@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBooks, type BookFormData, type ReadStatus } from '../contexts/BookContext'
 
@@ -41,6 +41,7 @@ export default function BookAddModal({ isOpen, onClose, defaultStatus = 'to_read
   })
   const [categoryMode, setCategoryMode] = useState<'select' | 'custom'>('select')
   const [error, setError] = useState<string>('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // 모달이 열릴 때마다 폼을 defaultStatus로 리셋
   useEffect(() => {
@@ -218,11 +219,15 @@ export default function BookAddModal({ isOpen, onClose, defaultStatus = 'to_read
                     )}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="book-cover-input" className="cursor-pointer rounded-sm border border-brass-2/40 px-3 py-2 font-korean-serif text-xs text-brass-2 hover:bg-brass-2/5">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="cursor-pointer rounded-sm border border-brass-2/40 px-3 py-2 font-korean-serif text-xs text-brass-2 hover:bg-brass-2/5"
+                    >
                       {form.cover_image_file ? '이미지 변경' : '이미지 선택'}
-                    </label>
+                    </button>
                     <input
-                      id="book-cover-input"
+                      ref={fileInputRef}
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
                       className="hidden"
