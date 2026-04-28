@@ -200,7 +200,7 @@ export default function BookDetailPage() {
                           setEditedBook({ ...editedBook, category: val })
                         }
                       }}
-                      className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                      className="w-full rounded-sm border border-slate-400 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
                     >
                       {CATEGORIES.map((cat) => (
                         <option key={cat} value={cat}>
@@ -216,7 +216,7 @@ export default function BookDetailPage() {
                       type="text"
                       value={editedBook.category}
                       onChange={(e) => setEditedBook({ ...editedBook, category: e.target.value })}
-                      className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                      className="w-full rounded-sm border border-slate-400 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
                       placeholder="카테고리"
                     />
                     <button
@@ -241,7 +241,7 @@ export default function BookDetailPage() {
               type="text"
               value={editedBook.title}
               onChange={(e) => setEditedBook({ ...editedBook, title: e.target.value })}
-              className="mt-2 rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-2xl font-semibold focus:border-brass-2 focus:outline-none"
+              className="mt-2 rounded-sm border border-slate-400 bg-white/70 px-3 py-2 font-korean-serif text-2xl font-semibold focus:border-brass-2 focus:outline-none"
               style={{ wordBreak: 'keep-all' }}
             />
           ) : (
@@ -254,7 +254,7 @@ export default function BookDetailPage() {
               type="text"
               value={editedBook.author}
               onChange={(e) => setEditedBook({ ...editedBook, author: e.target.value })}
-              className="mt-1 rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-serif text-sm italic focus:border-brass-2 focus:outline-none"
+              className="mt-1 rounded-sm border border-slate-400 bg-white/70 px-3 py-2 font-serif text-sm italic focus:border-brass-2 focus:outline-none"
             />
           ) : (
             <p className="mt-1 font-serif text-sm italic text-ink-soft">{book.author}</p>
@@ -305,7 +305,7 @@ export default function BookDetailPage() {
                       className={`rounded-sm border-2 px-3 py-2 text-xs font-korean-serif font-medium transition-all ${
                         editedBook.read_status === status
                           ? 'border-brass-2 bg-brass-2/10 text-brass-2'
-                          : 'border-brass-2/25 bg-white/50 text-ink-mute hover:border-brass-2/50'
+                          : 'border-slate-400 bg-white/50 text-ink-mute hover:border-brass-2/50'
                       }`}
                     >
                       {status === 'to_read' ? '읽을 책' : status === 'reading' ? '읽는 중' : '읽은 책'}
@@ -335,7 +335,7 @@ export default function BookDetailPage() {
                       onChange={() => {
                         // This would update the note's read_date in a real implementation
                       }}
-                      className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                      className="mt-2 w-full rounded-sm border border-slate-400 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -345,7 +345,7 @@ export default function BookDetailPage() {
                         type="number"
                         value={editedBook.total_pages}
                         onChange={(e) => setEditedBook({ ...editedBook, total_pages: Number(e.target.value) })}
-                        className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                        className="mt-2 w-full rounded-sm border border-slate-400 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
                         min="1"
                       />
                     </div>
@@ -355,7 +355,7 @@ export default function BookDetailPage() {
                         type="number"
                         value={editedBook.current_page}
                         onChange={(e) => setEditedBook({ ...editedBook, current_page: Number(e.target.value) })}
-                        className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                        className="mt-2 w-full rounded-sm border border-slate-400 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
                         min="0"
                         max={editedBook.total_pages}
                       />
@@ -391,7 +391,7 @@ export default function BookDetailPage() {
         <div className="mt-8 flex gap-3">
           <button
             onClick={handleCancelEdit}
-            className="flex-1 rounded-sm border border-brass-2/25 px-4 py-3 font-korean-serif text-sm font-medium text-ink-mute transition-colors hover:border-brass-2/50 hover:text-ink-soft"
+            className="flex-1 rounded-sm border border-slate-400 px-4 py-3 font-korean-serif text-sm font-medium text-ink-mute transition-colors hover:border-brass-2/50 hover:text-ink-soft"
           >
             취소
           </button>
@@ -487,7 +487,7 @@ export default function BookDetailPage() {
 // 책 정보 요약 배지 (노트 개수, 별점, 최근 독서일)
 function StatBadge({ label, value }: { label: string; value: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-brass-2/25 bg-white/60 px-3 py-1">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-400 bg-white/60 px-3 py-1">
       <span className="font-display text-[9px] uppercase tracking-[0.2em] text-ink-mute">{label}</span>
       <span className="font-korean-serif text-xs text-ink">{value}</span>
     </span>
@@ -498,7 +498,7 @@ function StatBadge({ label, value }: { label: string; value: string }) {
 function EmptyNotes() {
   return (
     <div className="flex flex-col items-center py-20 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full border border-brass-2/25 text-brass-2/50">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full border border-slate-400 text-brass-2/50">
         <QuillIcon />
       </div>
       <p className="mt-5 font-korean-serif text-base text-ink-soft">아직 작성한 노트가 없습니다</p>
@@ -576,8 +576,12 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
         })
       }
 
+      console.log('저장 시도:', saveContent)
       await onUpdate(note.id, saveContent, note.rating, note.read_date)
+      console.log('저장 완료')
       onClose()
+    } catch (err) {
+      console.error('저장 오류:', err)
     } finally {
       setIsSaving(false)
     }
@@ -604,7 +608,7 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
       <textarea
         value={noteContent}
         onChange={(e) => setNoteContent(e.target.value)}
-        className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+        className="w-full rounded-sm border border-slate-400 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
         style={{ height: '200px', resize: 'vertical' }}
         placeholder={noteData.type === 'quote' ? '인용문을 입력하세요...' : '감상을 입력하세요...'}
       />
@@ -619,7 +623,7 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
             type="number"
             value={notePage === null ? '' : notePage}
             onChange={(e) => setNotePage(e.target.value ? Number(e.target.value) : null)}
-            className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+            className="w-full rounded-sm border border-slate-400 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
             placeholder="페이지 번호"
             min="1"
           />
@@ -629,7 +633,7 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
       <div className="flex gap-2 mt-4">
         <button
           onClick={onClose}
-          className="flex-1 rounded-sm border border-brass-2/25 px-4 py-2 font-korean-serif text-sm font-medium text-ink-mute transition-colors hover:border-brass-2/50 hover:text-ink-soft"
+          className="flex-1 rounded-sm border border-slate-400 px-4 py-2 font-korean-serif text-sm font-medium text-ink-mute transition-colors hover:border-brass-2/50 hover:text-ink-soft"
         >
           취소
         </button>
@@ -687,7 +691,7 @@ function TableEditor({ tableRows, setTableRows, onClose, onSave, isSaving }: { t
       </div>
 
       {/* 표 컨테이너 - 가로 스크롤 가능 */}
-      <div className="overflow-x-auto mb-4 border border-brass-2/25 rounded-sm">
+      <div className="overflow-x-auto mb-4 border border-slate-400 rounded-sm">
         <table className="w-full border-collapse">
           <tbody>
             {tableRows.map((row, rowIdx) => (
@@ -695,7 +699,7 @@ function TableEditor({ tableRows, setTableRows, onClose, onSave, isSaving }: { t
                 {row.map((cell, colIdx) => (
                   <td
                     key={`${rowIdx}-${colIdx}`}
-                    className="border border-brass-2/25"
+                    className="border border-slate-400"
                   >
                     <input
                       type="text"
@@ -706,7 +710,7 @@ function TableEditor({ tableRows, setTableRows, onClose, onSave, isSaving }: { t
                     />
                   </td>
                 ))}
-                <td className="border border-brass-2/25 bg-brass-2/5 w-8 text-center">
+                <td className="border border-slate-400 bg-brass-2/5 w-8 text-center">
                   <button
                     onClick={() => removeRow(rowIdx)}
                     className="w-full h-full text-xs text-red-500 hover:text-red-700 font-bold"
@@ -719,7 +723,7 @@ function TableEditor({ tableRows, setTableRows, onClose, onSave, isSaving }: { t
               </tr>
             ))}
             <tr>
-              <td colSpan={(tableRows[0]?.length || 2) + 1} className="border border-brass-2/25 bg-brass-2/5">
+              <td colSpan={(tableRows[0]?.length || 2) + 1} className="border border-slate-400 bg-brass-2/5">
                 <button
                   onClick={addRow}
                   className="w-full px-2 py-1 text-xs font-korean-serif text-brass-2 hover:bg-brass-2/10 transition-colors"
@@ -758,7 +762,7 @@ function TableEditor({ tableRows, setTableRows, onClose, onSave, isSaving }: { t
       <div className="flex gap-2">
         <button
           onClick={onClose}
-          className="flex-1 rounded-sm border border-brass-2/25 px-4 py-2 font-korean-serif text-sm font-medium text-ink-mute transition-colors hover:border-brass-2/50 hover:text-ink-soft"
+          className="flex-1 rounded-sm border border-slate-400 px-4 py-2 font-korean-serif text-sm font-medium text-ink-mute transition-colors hover:border-brass-2/50 hover:text-ink-soft"
         >
           취소
         </button>
