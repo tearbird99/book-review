@@ -12,7 +12,7 @@ const CATEGORIES = ['소설', '과학', '철학', '동화']
 
 export default function BookDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const { books, notes: allNotes, updateBook, moveNote, deleteNote } = useBooks()
+  const { books, notes: allNotes, updateBook, updateNote, deleteNote } = useBooks()
 
   // UI 상태
   const [activeTab, setActiveTab] = useState<Tab>('notes')
@@ -448,18 +448,15 @@ export default function BookDetailPage() {
         {activeTab === 'notes' ? (
           notes.length > 0 ? (
             <ul className="flex flex-col gap-3">
-              {notes.map((note, idx) => (
+              {notes.map((note) => (
                 <li key={note.id}>
                   {editingNoteId === note.id ? (
-                    <NoteEditor note={note} onClose={() => setEditingNoteId(null)} />
+                    <NoteEditor note={note} onClose={() => setEditingNoteId(null)} onUpdate={updateNote} />
                   ) : (
                     <NoteCard
                       note={note}
                       onEdit={setEditingNoteId}
                       onDelete={(noteId) => deleteNote(noteId, book.id)}
-                      onMove={moveNote}
-                      isFirst={idx === 0}
-                      isLast={idx === notes.length - 1}
                     />
                   )}
                 </li>
@@ -534,7 +531,7 @@ function BookInfoTab({ book }: { book: Book }) {
 }
 
 // 노트 내용 편집 모드
-function NoteEditor({ note, onClose }: { note: ApiNote; onClose: () => void }) {
+function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () => void; onUpdate: (noteId: number, content: string, rating?: number, readDate?: string) => Promise<void> }) {
   // content 파싱 (JSON 형식일 수 있음)
   let noteData: any = { type: 'text', content: '' }
   try {
@@ -554,8 +551,6 @@ function NoteEditor({ note, onClose }: { note: ApiNote; onClose: () => void }) {
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      const { notesApi } = await import('../lib/api')
-
       // 타입에 따라 content 구성
       let saveContent = ''
       if (noteData.type === 'quote') {
@@ -571,9 +566,7 @@ function NoteEditor({ note, onClose }: { note: ApiNote; onClose: () => void }) {
         })
       }
 
-      await notesApi.update(note.id, {
-        content: saveContent,
-      })
+      await onUpdate(note.id, saveContent, note.rating, note.read_date)
       onClose()
     } finally {
       setIsSaving(false)

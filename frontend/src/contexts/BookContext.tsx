@@ -34,6 +34,7 @@ type BookContextType = {
   deleteBook: (bookId: number) => Promise<void>
   deleteNote: (noteId: number, bookId: number) => Promise<void>
   updateBook: (bookId: number, updates: Partial<Book>) => Promise<void>
+  updateNote: (noteId: number, content: string, rating?: number, readDate?: string) => Promise<void>
   moveNote: (noteId: number, direction: 'up' | 'down') => void
 }
 
@@ -212,6 +213,21 @@ export function BookProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // 노트 수정
+  const updateNote = async (noteId: number, content: string, rating?: number, readDate?: string): Promise<void> => {
+    try {
+      const updateData: any = { content }
+      if (rating !== undefined) updateData.rating = rating
+      if (readDate !== undefined) updateData.read_date = readDate
+
+      await notesApi.update(noteId, updateData)
+      setNotes(notes.map((n) => (n.id === noteId ? { ...n, content, rating: rating !== undefined ? rating : n.rating, read_date: readDate || n.read_date } : n)))
+    } catch (err) {
+      console.error('Failed to update note:', err)
+      throw err
+    }
+  }
+
   // 책 정보 업데이트
   const updateBook = async (bookId: number, updates: Partial<Book>): Promise<void> => {
     try {
@@ -239,7 +255,7 @@ export function BookProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <BookContext.Provider value={{ books, notes, loading, error, addBook, addNote, deleteBook, deleteNote, updateBook, moveNote }}>
+    <BookContext.Provider value={{ books, notes, loading, error, addBook, addNote, deleteBook, deleteNote, updateBook, updateNote, moveNote }}>
       {children}
     </BookContext.Provider>
   )
