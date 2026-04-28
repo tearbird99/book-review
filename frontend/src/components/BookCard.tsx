@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import type { MockBook } from '../data/mockBooks'
-import { useBooks } from '../contexts/BookContext'
+import { useBooks, type Book } from '../contexts/BookContext'
 import Ornament from './Ornament'
 
 type Props = {
-  book: MockBook
+  book: Book
   deleteMode?: boolean
   onDelete?: () => void
 }
@@ -34,7 +33,7 @@ export default function BookCard({ book, deleteMode = false, onDelete }: Props) 
           {/* article에 relative — 책갈피가 카드 위로 삐져나올 수 있도록 */}
           <article className={`relative cursor-pointer transition-opacity ${deleteMode ? 'opacity-50' : ''}`}>
             {/* 읽는 중: 황금 책갈피 (표지 위쪽) */}
-            {book.status === 'reading' && <Bookmark deleteMode={deleteMode} />}
+            {book.read_status === 'reading' && <Bookmark deleteMode={deleteMode} />}
 
             {/* 책 표지 */}
             <div
@@ -72,7 +71,7 @@ export default function BookCard({ book, deleteMode = false, onDelete }: Props) 
               ))}
 
               {/* 읽은 책: 황동 인장 (표지 우하단, overflow-hidden 안) */}
-              {book.status === 'read' && (
+              {book.read_status === 'read' && (
                 <div className="absolute bottom-3 right-3 z-10">
                   <Seal accent={book.accent} />
                 </div>

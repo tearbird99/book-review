@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import type { MockBook } from '../data/mockBooks'
-import type { MockNote } from '../data/mockNotes'
+import { useBooks, type Book } from '../contexts/BookContext'
+import type { ApiNote } from '../types/api'
 import NoteCard from '../components/NoteCard'
 import Ornament from '../components/Ornament'
 import NoteAddModal from '../components/NoteAddModal'
-import { useBooks } from '../contexts/BookContext'
 
 type Tab = 'notes' | 'info'
 
@@ -18,7 +17,7 @@ export default function BookDetailPage() {
   // UI 상태
   const [activeTab, setActiveTab] = useState<Tab>('notes')
   const [isEditMode, setIsEditMode] = useState(false)
-  const [editedBook, setEditedBook] = useState<MockBook | null>(null)
+  const [editedBook, setEditedBook] = useState<Book | null>(null)
   const [categoryMode, setCategoryMode] = useState<'select' | 'custom'>('select')
   const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false)
   const [editingNoteId, setEditingNoteId] = useState<number | null>(null)
@@ -37,9 +36,9 @@ export default function BookDetailPage() {
 
   // 편집 중이면 임시 데이터, 아니면 원본 데이터 표시
   const displayBook = isEditMode && editedBook ? editedBook : book
-  const { totalPages = 0, currentPage = 0 } = displayBook
+  const { total_pages = 0, current_page = 0 } = displayBook
   // 읽은 페이지 진행률 계산
-  const progress = totalPages > 0 ? Math.round((currentPage / totalPages) * 100) : 0
+  const progress = total_pages > 0 ? Math.round((current_page / total_pages) * 100) : 0
 
   const [from, to] = book.spineGradient
 
@@ -89,7 +88,7 @@ export default function BookDetailPage() {
         {/* 책 표지 미니 — relative 래퍼로 책갈피가 삐져나올 수 있게 */}
         <div className="relative shrink-0">
           {/* 읽는 중: 책갈피 */}
-          {book.status === 'reading' && <DetailBookmark />}
+          {book.read_status === 'reading' && <DetailBookmark />}
 
           <div
             className="relative h-44 w-[120px] overflow-hidden rounded-[2px] shadow-[0_8px_28px_-6px_rgba(31,22,51,0.25)] ring-1 ring-black/20"
@@ -113,7 +112,7 @@ export default function BookDetailPage() {
               <Ornament name={book.ornament} className="h-8 w-8 opacity-60" />
             </div>
             {/* 읽은 책: 인장 */}
-            {book.status === 'read' && (
+            {book.read_status === 'read' && (
               <div className="absolute bottom-2.5 right-2.5 z-10">
                 <DetailSeal accent={book.accent} />
               </div>
@@ -172,7 +171,7 @@ export default function BookDetailPage() {
                 {book.category}
               </span>
             )}
-            <StatusLabel status={book.status} />
+            <StatusLabel status={book.read_status} />
           </div>
           {isEditMode && editedBook ? (
             <input
@@ -245,8 +244,8 @@ export default function BookDetailPage() {
                   <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">전체 페이지</label>
                   <input
                     type="number"
-                    value={editedBook.totalPages}
-                    onChange={(e) => setEditedBook({ ...editedBook, totalPages: Number(e.target.value) })}
+                    value={editedBook.total_pages}
+                    onChange={(e) => setEditedBook({ ...editedBook, total_pages: Number(e.target.value) })}
                     className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
                     min="1"
                   />
@@ -255,11 +254,11 @@ export default function BookDetailPage() {
                   <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">읽은 페이지</label>
                   <input
                     type="number"
-                    value={editedBook.currentPage}
-                    onChange={(e) => setEditedBook({ ...editedBook, currentPage: Number(e.target.value) })}
+                    value={editedBook.current_page}
+                    onChange={(e) => setEditedBook({ ...editedBook, current_page: Number(e.target.value) })}
                     className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
                     min="0"
-                    max={editedBook.totalPages}
+                    max={editedBook.total_pages}
                   />
                 </div>
               </div>
@@ -267,7 +266,7 @@ export default function BookDetailPage() {
           )}
 
           {/* 페이지 진행 바 */}
-          {totalPages > 0 && (
+          {total_pages > 0 && (
             <div className="mt-5 w-full">
               <div className="h-1.5 overflow-hidden rounded-full bg-brass-2/12">
                 <div
@@ -277,7 +276,7 @@ export default function BookDetailPage() {
               </div>
               <div className="mt-1.5 flex justify-between text-[11px]">
                 <span className="text-ink-mute">
-                  {currentPage.toLocaleString()} / {totalPages.toLocaleString()} 페이지
+                  {current_page.toLocaleString()} / {total_pages.toLocaleString()} 페이지
                 </span>
                 <span className="font-semibold text-ink">{progress}%</span>
               </div>
@@ -411,7 +410,7 @@ function EmptyNotes() {
 }
 
 // 책 정보 탭 (제목, 저자, 분류, 등록일)
-function BookInfoTab({ book }: { book: MockBook }) {
+function BookInfoTab({ book }: { book: Book }) {
   return (
     <div className="rounded-sm border border-brass-2/15 bg-white/50 px-6 py-5">
       <dl className="flex flex-col gap-4">
@@ -434,7 +433,7 @@ function BookInfoTab({ book }: { book: MockBook }) {
 }
 
 // 노트 내용 편집 모드
-function NoteEditor({ note, onClose }: { note: MockNote; onClose: () => void }) {
+function NoteEditor({ note, onClose }: { note: ApiNote; onClose: () => void }) {
   const [content, setContent] = useState(note.content)
   const [isSaving, setIsSaving] = useState(false)
 
