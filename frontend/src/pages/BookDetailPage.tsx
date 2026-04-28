@@ -227,7 +227,18 @@ export default function BookDetailPage() {
                     <button
                       key={status}
                       type="button"
-                      onClick={() => setEditedBook({ ...editedBook, read_status: status })}
+                      onClick={() => {
+                        if (status === 'read') {
+                          // '읽은 책' → 읽은 페이지 = 전체 페이지
+                          setEditedBook({ ...editedBook, read_status: status, current_page: editedBook.total_pages })
+                        } else if (status === 'to_read') {
+                          // '읽을 책' → 읽은 페이지 = 0
+                          setEditedBook({ ...editedBook, read_status: status, current_page: 0 })
+                        } else {
+                          // '읽는 중' → 원본 값으로 복원
+                          setEditedBook({ ...editedBook, read_status: status, current_page: book.current_page })
+                        }
+                      }}
                       className={`rounded-sm border-2 px-3 py-2 text-xs font-korean-serif font-medium transition-all ${
                         editedBook.read_status === status
                           ? 'border-brass-2 bg-brass-2/10 text-brass-2'
