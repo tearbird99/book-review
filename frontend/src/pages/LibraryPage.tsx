@@ -184,7 +184,7 @@ export default function LibraryPage() {
             <ChevronDown className={`h-3 w-3 transition-transform ${isSortOpen ? 'rotate-180' : ''}`} />
           </button>
           {isSortOpen && (
-            <div className="absolute right-0 mt-2 rounded-sm border border-brass-2/25 bg-white shadow-lg z-10 min-w-[150px]">
+            <div className="absolute right-0 mt-2 rounded-sm border border-brass-2/25 bg-white shadow-lg z-50 min-w-[150px]">
               {SORT_OPTIONS.map((option) => (
                 <button
                   key={option.key}
