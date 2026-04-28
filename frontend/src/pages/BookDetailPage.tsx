@@ -561,7 +561,7 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
         })
       } else {
         saveContent = JSON.stringify({
-          type: 'text',
+          type: noteData.type,
           content: noteContent,
         })
       }
@@ -577,7 +577,7 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
     <div className="rounded-sm border border-brass-2/30 bg-gradient-to-br from-white to-white/50 px-6 py-5 shadow-[0_2px_12px_-4px_rgba(31,22,51,0.12)]">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-korean-serif text-sm font-semibold text-ink">
-          {noteData.type === 'quote' ? '인용구 편집' : '감상 편집'}
+          {noteData.type === 'quote' ? '인용구 편집' : noteData.type === 'table' ? '표 편집' : '감상 편집'}
         </h3>
         <button
           onClick={onClose}

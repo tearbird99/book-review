@@ -50,6 +50,11 @@ export default function NoteAddModal({ bookId, isOpen, onClose, onSuccess }: Pro
       }
       // 다른 타입들은 나중에 추가 (현재는 감상과 인용구만 지원)
 
+      // emptyContent가 비어있으면 기본값으로 설정
+      if (!emptyContent) {
+        emptyContent = JSON.stringify({ type: noteType, content: '' })
+      }
+
       const newNoteId = await addNote(bookId, emptyContent, readDate)
       onClose()
       onSuccess?.(newNoteId)
