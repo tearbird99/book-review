@@ -201,10 +201,10 @@ export default function BookDetailPage() {
           {!isEditMode && (
             <div className="mt-4 flex flex-wrap gap-2">
               <StatBadge label="노트" value={`${notes.length}개`} />
-              {book.rating != null && (
+              {(book.read_status === 'reading' || book.read_status === 'read') && book.rating != null && (
                 <StatBadge
                   label="내 별점"
-                  value={'★'.repeat(book.rating) + '☆'.repeat(5 - book.rating)}
+                  value={'★'.repeat(Math.round(book.rating)) + '☆'.repeat(5 - Math.round(book.rating))}
                 />
               )}
               {notes.length > 0 && (
@@ -219,49 +219,55 @@ export default function BookDetailPage() {
           {/* 편집 모드: 필드 수정 */}
           {isEditMode && editedBook && (
             <div className="mt-4 space-y-4 rounded-sm bg-brass-2/5 p-4">
-              <div>
-                <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">별점</label>
-                <div className="mt-2">
-                  <StarRating
-                    value={editedBook.rating || 0}
-                    onChange={(rating) => setEditedBook({ ...editedBook, rating })}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">읽은 날짜</label>
-                <input
-                  type="date"
-                  value={notes.length > 0 ? notes[notes.length - 1].read_date : ''}
-                  onChange={() => {
-                    // This would update the note's read_date in a real implementation
-                  }}
-                  className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+              {(editedBook.read_status === 'reading' || editedBook.read_status === 'read') && (
                 <div>
-                  <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">전체 페이지</label>
-                  <input
-                    type="number"
-                    value={editedBook.total_pages}
-                    onChange={(e) => setEditedBook({ ...editedBook, total_pages: Number(e.target.value) })}
-                    className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
-                    min="1"
-                  />
+                  <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">별점</label>
+                  <div className="mt-2">
+                    <StarRating
+                      value={editedBook.rating || 0}
+                      onChange={(rating) => setEditedBook({ ...editedBook, rating })}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">읽은 페이지</label>
-                  <input
-                    type="number"
-                    value={editedBook.current_page}
-                    onChange={(e) => setEditedBook({ ...editedBook, current_page: Number(e.target.value) })}
-                    className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
-                    min="0"
-                    max={editedBook.total_pages}
-                  />
-                </div>
-              </div>
+              )}
+              {editedBook.read_status !== 'to_read' && (
+                <>
+                  <div>
+                    <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">읽은 날짜</label>
+                    <input
+                      type="date"
+                      value={notes.length > 0 ? notes[notes.length - 1].read_date : ''}
+                      onChange={() => {
+                        // This would update the note's read_date in a real implementation
+                      }}
+                      className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">전체 페이지</label>
+                      <input
+                        type="number"
+                        value={editedBook.total_pages}
+                        onChange={(e) => setEditedBook({ ...editedBook, total_pages: Number(e.target.value) })}
+                        className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                        min="1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">읽은 페이지</label>
+                      <input
+                        type="number"
+                        value={editedBook.current_page}
+                        onChange={(e) => setEditedBook({ ...editedBook, current_page: Number(e.target.value) })}
+                        className="mt-2 w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                        min="0"
+                        max={editedBook.total_pages}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
