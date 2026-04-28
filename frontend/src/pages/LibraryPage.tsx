@@ -84,20 +84,27 @@ export default function LibraryPage() {
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-12">
       {/* 헤더: 브랜딩 + 액션 버튼 (검색, 정렬, 삭제 모드) */}
       <header className="mb-12 flex items-start justify-between">
-        <div>
-          <p className="font-display text-[11px] uppercase tracking-[0.4em] text-brass-2">
-            Wizard&apos;s Library
-          </p>
-          <h1 className="mt-2 font-korean-serif text-4xl font-semibold tracking-wide text-ink">
-            마법사의 서재
-          </h1>
-          <div className="mt-3 flex items-center gap-3">
-            <span className="h-px w-12 bg-brass-2/60" />
-            <span className="font-serif text-sm italic text-ink-soft">
-              Codices et notae lectoris
-            </span>
-            <span className="h-px w-12 bg-brass-2/60" />
+        <div className="flex items-center gap-3">
+          <div>
+            <p className="font-display text-[11px] uppercase tracking-[0.4em] text-brass-2">
+              Wizard&apos;s Library
+            </p>
+            <h1 className="mt-2 font-korean-serif text-4xl font-semibold tracking-wide text-ink">
+              마법사의 서재
+            </h1>
+            <div className="mt-3 flex items-center gap-3">
+              <span className="h-px w-12 bg-brass-2/60" />
+              <span className="font-serif text-sm italic text-ink-soft">
+                Codices et notae lectoris
+              </span>
+              <span className="h-px w-12 bg-brass-2/60" />
+            </div>
           </div>
+          <img
+            src="/wizard-logo.png"
+            alt="Wizard's Library"
+            className="h-24 w-auto flex-shrink-0 object-contain"
+          />
         </div>
 
         <div className="flex items-center gap-3 pt-2">
