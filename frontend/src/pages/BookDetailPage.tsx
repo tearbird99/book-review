@@ -21,6 +21,8 @@ export default function BookDetailPage() {
   const [categoryMode, setCategoryMode] = useState<'select' | 'custom'>('select')
   const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false)
   const [editingNoteId, setEditingNoteId] = useState<number | null>(null)
+  const [coverImageFile, setCoverImageFile] = useState<File | null>(null)
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null)
 
   // URL에서 책 ID 추출, 현재 책만 필터링
   const book = books.find((b) => b.id === Number(id))
@@ -42,10 +44,33 @@ export default function BookDetailPage() {
 
   const [from, to] = book.spineGradient
 
+  // 표지 이미지 선택
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 2 * 1024 * 1024) return
+    setCoverImageFile(file)
+    setCoverPreviewUrl(URL.createObjectURL(file))
+  }
+
   // 책 정보 저장
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editedBook) return
-    updateBook(book.id, editedBook)
+
+    let bookToUpdate = editedBook
+
+    // 이미지 업로드 (있는 경우)
+    if (coverImageFile) {
+      const { booksApi } = await import('../lib/api')
+      const uploadResponse = await booksApi.uploadCover(book.id, coverImageFile)
+      // 업로드된 이미지의 URL을 editedBook에 반영
+      bookToUpdate = { ...editedBook, cover_image_url: uploadResponse.data.cover_image_url }
+      setCoverImageFile(null)
+      if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl)
+      setCoverPreviewUrl(null)
+    }
+
+    updateBook(book.id, bookToUpdate)
     setIsEditMode(false)
   }
 
@@ -54,6 +79,9 @@ export default function BookDetailPage() {
     setIsEditMode(false)
     setEditedBook(null)
     setCategoryMode('select')
+    setCoverImageFile(null)
+    if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl)
+    setCoverPreviewUrl(null)
   }
 
   return (
@@ -107,10 +135,40 @@ export default function BookDetailPage() {
               className="absolute inset-[6px] rounded-[1px] border pointer-events-none"
               style={{ borderColor: book.accent + '50' }}
             />
-            {/* 오너먼트 */}
-            <div className="absolute inset-0 flex items-center justify-center" style={{ color: book.accent }}>
-              <Ornament name={book.ornament} className="h-8 w-8 opacity-60" />
-            </div>
+
+            {/* 실제 이미지가 있으면 덮어씌우기 */}
+            {(coverPreviewUrl || book.cover_image_url) && (
+              <img
+                src={coverPreviewUrl || `http://localhost:8000${book.cover_image_url}`}
+                alt={book.title}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            )}
+
+            {/* 편집 모드에서 카메라 오버레이 */}
+            {isEditMode && (
+              <>
+                <label htmlFor="cover-image-input" className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center bg-black/50 text-white hover:bg-black/70 transition-colors">
+                  <span className="text-2xl">📷</span>
+                  <span className="mt-2 text-xs font-korean-serif">표지 변경</span>
+                </label>
+                <input
+                  id="cover-image-input"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleCoverChange}
+                />
+              </>
+            )}
+
+            {/* 기존 오너먼트 (이미지 없을 때만) */}
+            {!book.cover_image_url && !coverPreviewUrl && (
+              <div className="absolute inset-0 flex items-center justify-center" style={{ color: book.accent }}>
+                <Ornament name={book.ornament} className="h-8 w-8 opacity-60" />
+              </div>
+            )}
+
             {/* 읽은 책: 인장 */}
             {book.read_status === 'read' && (
               <div className="absolute bottom-2.5 right-2.5 z-10">

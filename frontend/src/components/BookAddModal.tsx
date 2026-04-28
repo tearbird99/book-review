@@ -16,6 +16,8 @@ type BookAddFormData = {
   start_date?: string
   end_date?: string
   rating?: number
+  cover_image_file?: File
+  cover_preview_url?: string
 }
 
 type Props = {
@@ -43,6 +45,10 @@ export default function BookAddModal({ isOpen, onClose, defaultStatus = 'to_read
   // 모달이 열릴 때마다 폼을 defaultStatus로 리셋
   useEffect(() => {
     if (isOpen) {
+      // 기존 미리보기 URL 정리
+      if (form.cover_preview_url) {
+        URL.revokeObjectURL(form.cover_preview_url)
+      }
       setForm({
         title: '',
         author: '',
@@ -73,6 +79,36 @@ export default function BookAddModal({ isOpen, onClose, defaultStatus = 'to_read
       start_date: undefined,
       end_date: undefined,
       rating: undefined,
+    }))
+  }
+
+  // 표지 이미지 선택
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError('이미지 크기는 2MB 이하여야 합니다')
+      return
+    }
+
+    const previewUrl = URL.createObjectURL(file)
+    setForm((prev) => ({
+      ...prev,
+      cover_image_file: file,
+      cover_preview_url: previewUrl,
+    }))
+  }
+
+  // 표지 이미지 제거
+  const handleRemoveCoverImage = () => {
+    if (form.cover_preview_url) {
+      URL.revokeObjectURL(form.cover_preview_url)
+    }
+    setForm((prev) => ({
+      ...prev,
+      cover_image_file: undefined,
+      cover_preview_url: undefined,
     }))
   }
 
@@ -129,6 +165,7 @@ export default function BookAddModal({ isOpen, onClose, defaultStatus = 'to_read
       start_date: form.start_date,
       end_date: form.end_date,
       rating: form.rating,
+      cover_image_file: form.cover_image_file,
     }
 
     // 책 생성 후 상세 페이지로 이동
@@ -170,6 +207,41 @@ export default function BookAddModal({ isOpen, onClose, defaultStatus = 'to_read
             )}
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+              {/* 표지 이미지 */}
+              <FormGroup label="표지 이미지">
+                <div className="flex items-center gap-4">
+                  <div className="h-20 w-14 flex-shrink-0 overflow-hidden rounded-[2px] border border-brass-2/25 bg-brass-2/5">
+                    {form.cover_preview_url ? (
+                      <img src={form.cover_preview_url} alt="표지 미리보기" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-brass-2/30 text-2xl">📖</div>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="book-cover-input" className="cursor-pointer rounded-sm border border-brass-2/40 px-3 py-2 font-korean-serif text-xs text-brass-2 hover:bg-brass-2/5">
+                      {form.cover_image_file ? '이미지 변경' : '이미지 선택'}
+                    </label>
+                    <input
+                      id="book-cover-input"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={handleCoverImageChange}
+                    />
+                    {form.cover_image_file && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveCoverImage}
+                        className="text-xs text-ink-mute hover:text-red-500"
+                      >
+                        제거
+                      </button>
+                    )}
+                    <p className="text-[11px] text-ink-mute">선택 안 하면 기본 표지 사용</p>
+                  </div>
+                </div>
+              </FormGroup>
+
               {/* 공통 입력: 제목, 저자, 페이지 */}
               <div className="space-y-4">
                 <FormGroup label="제목" required>

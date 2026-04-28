@@ -46,6 +46,15 @@ export const booksApi = {
 
   // 책 삭제
   delete: (id: number) => apiClient.delete(`/books/${id}`),
+
+  // 책 표지 이미지 업로드
+  uploadCover: (id: number, file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return apiClient.post<ApiBook>(`/books/${id}/cover`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
 };
 
 // ============================================================================

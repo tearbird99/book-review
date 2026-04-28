@@ -83,7 +83,7 @@ def seed_data():
             {
                 "title": "차라투스트라는 이렇게 말했다",
                 "author": "프리드리히 니체",
-                "cover_image_url": "/static/covers/alchemist.jpg",
+                "cover_image_url": "/static/covers/zarathustra.jpg",
                 "category": "철학",
                 "total_pages": 528,
                 "current_page": 0,

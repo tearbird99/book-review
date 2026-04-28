@@ -70,6 +70,20 @@ export default function BookCard({ book, deleteMode = false, onDelete }: Props) 
                 />
               ))}
 
+              {/* 실제 이미지가 있으면 그라데이션 위에 오버레이 */}
+              {book.cover_image_url && (
+                <img
+                  src={book.cover_image_url.startsWith('/static')
+                    ? `http://localhost:8000${book.cover_image_url}`
+                    : book.cover_image_url}
+                  alt={book.title}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
+              )}
+
               {/* 읽은 책: 황동 인장 (표지 우하단, overflow-hidden 안) */}
               {book.read_status === 'read' && (
                 <div className="absolute bottom-3 right-3 z-10">
@@ -77,42 +91,44 @@ export default function BookCard({ book, deleteMode = false, onDelete }: Props) 
                 </div>
               )}
 
-              {/* 본문 */}
-              <div className="relative flex h-full flex-col items-center justify-between p-5 text-center">
-                <div className="font-display text-[10px] uppercase tracking-[0.3em]" style={{ color: book.accent + 'cc' }}>
-                  {book.category}
+              {/* 본문 (이미지 없을 때만 표시) */}
+              {!book.cover_image_url && (
+                <div className="relative flex h-full flex-col items-center justify-between p-5 text-center">
+                  <div className="font-display text-[10px] uppercase tracking-[0.3em]" style={{ color: book.accent + 'cc' }}>
+                    {book.category}
+                  </div>
+                  <div className="flex flex-col items-center gap-3">
+                    <div style={{ color: book.accent }}>
+                      <Ornament name={book.ornament} className="h-5 w-5 opacity-80" />
+                    </div>
+                    <h3
+                      className="font-korean-serif text-base font-semibold leading-tight text-parchment drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+                      style={{ wordBreak: 'keep-all' }}
+                    >
+                      {book.title}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <span className="h-px w-4" style={{ backgroundColor: book.accent }} />
+                      <span className="font-serif text-[11px] italic" style={{ color: book.accent + 'dd' }}>
+                        {book.author}
+                      </span>
+                      <span className="h-px w-4" style={{ backgroundColor: book.accent }} />
+                    </div>
+                  </div>
+                  {/* 별점: 읽는 중 or 읽은 책일 때만 표시 */}
+                  {(book.read_status === 'reading' || book.read_status === 'read') && (
+                    <div className="font-display text-[9px] tracking-[0.2em]" style={{ color: book.accent + '99' }}>
+                      {book.rating ? '★'.repeat(Math.round(book.rating)) + '☆'.repeat(5 - Math.round(book.rating)) : '— —'}
+                    </div>
+                  )}
+                  {/* 읽을 책일 때: 공백 유지 */}
+                  {book.read_status === 'to_read' && (
+                    <div className="font-display text-[9px] tracking-[0.2em]" style={{ color: book.accent + '99' }}>
+                      &nbsp;
+                    </div>
+                  )}
                 </div>
-                <div className="flex flex-col items-center gap-3">
-                  <div style={{ color: book.accent }}>
-                    <Ornament name={book.ornament} className="h-5 w-5 opacity-80" />
-                  </div>
-                  <h3
-                    className="font-korean-serif text-base font-semibold leading-tight text-parchment drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
-                    style={{ wordBreak: 'keep-all' }}
-                  >
-                    {book.title}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <span className="h-px w-4" style={{ backgroundColor: book.accent }} />
-                    <span className="font-serif text-[11px] italic" style={{ color: book.accent + 'dd' }}>
-                      {book.author}
-                    </span>
-                    <span className="h-px w-4" style={{ backgroundColor: book.accent }} />
-                  </div>
-                </div>
-                {/* 별점: 읽는 중 or 읽은 책일 때만 표시 */}
-                {(book.read_status === 'reading' || book.read_status === 'read') && (
-                  <div className="font-display text-[9px] tracking-[0.2em]" style={{ color: book.accent + '99' }}>
-                    {book.rating ? '★'.repeat(Math.round(book.rating)) + '☆'.repeat(5 - Math.round(book.rating)) : '— —'}
-                  </div>
-                )}
-                {/* 읽을 책일 때: 공백 유지 */}
-                {book.read_status === 'to_read' && (
-                  <div className="font-display text-[9px] tracking-[0.2em]" style={{ color: book.accent + '99' }}>
-                    &nbsp;
-                  </div>
-                )}
-              </div>
+              )}
             </div>
 
             {/* 카드 하단 메타 */}
@@ -120,6 +136,14 @@ export default function BookCard({ book, deleteMode = false, onDelete }: Props) 
               <p className="font-korean-serif text-sm text-ink">{book.title}</p>
               <p className="mt-0.5 text-xs text-ink-mute">
                 {book.author} · {book.read_status === 'to_read' ? 0 : book.current_page}/{book.total_pages} · 노트 {book.notes}
+              </p>
+              {/* 별점 표시 */}
+              <p className="mt-1 font-display text-[10px] tracking-[0.1em] text-brass-2/80">
+                {book.read_status === 'to_read'
+                  ? '— —'
+                  : book.rating
+                    ? '★'.repeat(Math.round(book.rating)) + '☆'.repeat(5 - Math.round(book.rating))
+                    : '— —'}
               </p>
               <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-brass-2/12">
                 <div

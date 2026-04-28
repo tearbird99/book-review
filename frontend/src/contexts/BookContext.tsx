@@ -48,6 +48,7 @@ export type BookFormData = {
   start_date?: string
   end_date?: string
   rating?: number
+  cover_image_file?: File
 }
 
 // 카테고리별 UI 스타일 매핑
@@ -136,7 +137,7 @@ export function BookProvider({ children }: { children: ReactNode }) {
   // 책 추가
   const addBook = async (data: BookFormData): Promise<{ bookId: number; noteId: number }> => {
     try {
-      const newBook = await booksApi.create({
+      let newBook = await booksApi.create({
         title: data.title,
         author: data.author,
         category: data.custom_category || data.category,
@@ -147,6 +148,12 @@ export function BookProvider({ children }: { children: ReactNode }) {
       })
 
       const bookId = newBook.data.id
+
+      // 표지 이미지 업로드 (있는 경우)
+      if (data.cover_image_file) {
+        const uploadRes = await booksApi.uploadCover(bookId, data.cover_image_file)
+        newBook = uploadRes
+      }
 
       // 초기 빈 노트 생성
       const newNote = await notesApi.create(bookId, {
@@ -216,6 +223,7 @@ export function BookProvider({ children }: { children: ReactNode }) {
       if (updates.current_page !== undefined) updateData.current_page = updates.current_page
       if (updates.read_status) updateData.read_status = updates.read_status
       if (updates.rating !== undefined) updateData.rating = updates.rating
+      if (updates.cover_image_url !== undefined) updateData.cover_image_url = updates.cover_image_url
 
       const updatedBook = await booksApi.update(bookId, updateData)
       setApiBooks(apiBooks.map((b) => (b.id === bookId ? updatedBook.data : b)))
