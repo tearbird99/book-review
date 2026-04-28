@@ -546,18 +546,28 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
 
   const [noteContent, setNoteContent] = useState(noteData.content || '')
   const [notePage, setNotePage] = useState<number | null>(noteData.page || null)
+  const [tableRows, setTableRows] = useState<string[][]>(() => {
+    if (noteData.type === 'table' && Array.isArray(noteData.content)) {
+      return noteData.content
+    }
+    return [['', ''], ['', '']]
+  })
   const [isSaving, setIsSaving] = useState(false)
 
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      // 타입에 따라 content 구성
       let saveContent = ''
       if (noteData.type === 'quote') {
         saveContent = JSON.stringify({
           type: 'quote',
           content: noteContent,
           page: notePage,
+        })
+      } else if (noteData.type === 'table') {
+        saveContent = JSON.stringify({
+          type: 'table',
+          content: tableRows,
         })
       } else {
         saveContent = JSON.stringify({
@@ -573,11 +583,15 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
     }
   }
 
+  if (noteData.type === 'table') {
+    return <TableEditor tableRows={tableRows} setTableRows={setTableRows} onClose={onClose} onSave={handleSave} isSaving={isSaving} />
+  }
+
   return (
     <div className="rounded-sm border border-brass-2/30 bg-gradient-to-br from-white to-white/50 px-6 py-5 shadow-[0_2px_12px_-4px_rgba(31,22,51,0.12)]">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-korean-serif text-sm font-semibold text-ink">
-          {noteData.type === 'quote' ? '인용구 편집' : noteData.type === 'table' ? '표 편집' : '감상 편집'}
+          {noteData.type === 'quote' ? '인용구 편집' : '감상 편집'}
         </h3>
         <button
           onClick={onClose}
@@ -621,6 +635,135 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
         </button>
         <button
           onClick={handleSave}
+          disabled={isSaving}
+          className="flex-1 rounded-sm bg-brass-2 px-4 py-2 font-korean-serif text-sm font-medium text-white transition-colors hover:bg-brass-2/90 disabled:opacity-50"
+        >
+          {isSaving ? '저장 중...' : '저장'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// 표 에디터 컴포넌트
+function TableEditor({ tableRows, setTableRows, onClose, onSave, isSaving }: { tableRows: string[][]; setTableRows: (rows: string[][]) => void; onClose: () => void; onSave: () => Promise<void>; isSaving: boolean }) {
+  const handleCellChange = (rowIdx: number, colIdx: number, value: string) => {
+    const newRows = tableRows.map((row, ri) =>
+      ri === rowIdx ? row.map((cell, ci) => (ci === colIdx ? value : cell)) : row
+    )
+    setTableRows(newRows)
+  }
+
+  const addRow = () => {
+    const newRow = Array(tableRows[0]?.length || 2).fill('')
+    setTableRows([...tableRows, newRow])
+  }
+
+  const addColumn = () => {
+    const newRows = tableRows.map((row) => [...row, ''])
+    setTableRows(newRows)
+  }
+
+  const removeRow = (rowIdx: number) => {
+    if (tableRows.length > 1) {
+      setTableRows(tableRows.filter((_, i) => i !== rowIdx))
+    }
+  }
+
+  const removeColumn = (colIdx: number) => {
+    if (tableRows[0]?.length > 1) {
+      const newRows = tableRows.map((row) => row.filter((_, i) => i !== colIdx))
+      setTableRows(newRows)
+    }
+  }
+
+  return (
+    <div className="rounded-sm border border-brass-2/30 bg-gradient-to-br from-white to-white/50 px-6 py-5 shadow-[0_2px_12px_-4px_rgba(31,22,51,0.12)]">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-korean-serif text-sm font-semibold text-ink">표 편집</h3>
+        <button onClick={onClose} className="text-ink-mute hover:text-ink transition-colors">
+          ✕
+        </button>
+      </div>
+
+      {/* 표 컨테이너 - 가로 스크롤 가능 */}
+      <div className="overflow-x-auto mb-4 border border-brass-2/25 rounded-sm">
+        <table className="w-full border-collapse">
+          <tbody>
+            {tableRows.map((row, rowIdx) => (
+              <tr key={rowIdx}>
+                {row.map((cell, colIdx) => (
+                  <td
+                    key={`${rowIdx}-${colIdx}`}
+                    className="border border-brass-2/25"
+                  >
+                    <input
+                      type="text"
+                      value={cell}
+                      onChange={(e) => handleCellChange(rowIdx, colIdx, e.target.value)}
+                      className="w-24 px-2 py-2 font-korean-serif text-sm bg-white/70 focus:bg-white focus:outline-none border-none"
+                      placeholder="입력"
+                    />
+                  </td>
+                ))}
+                <td className="border border-brass-2/25 bg-brass-2/5 w-8 text-center">
+                  <button
+                    onClick={() => removeRow(rowIdx)}
+                    className="w-full h-full text-xs text-red-500 hover:text-red-700 font-bold"
+                    disabled={tableRows.length === 1}
+                    title="행 삭제"
+                  >
+                    −
+                  </button>
+                </td>
+              </tr>
+            ))}
+            <tr>
+              <td colSpan={(tableRows[0]?.length || 2) + 1} className="border border-brass-2/25 bg-brass-2/5">
+                <button
+                  onClick={addRow}
+                  className="w-full px-2 py-1 text-xs font-korean-serif text-brass-2 hover:bg-brass-2/10 transition-colors"
+                >
+                  + 행 추가
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* 열 삭제 버튼 */}
+      {tableRows[0] && (
+        <div className="flex gap-1 mb-4">
+          {tableRows[0].map((_, colIdx) => (
+            <button
+              key={colIdx}
+              onClick={() => removeColumn(colIdx)}
+              className="px-2 py-1 text-xs text-red-500 hover:text-red-700 border border-red-500/30 rounded-sm font-bold"
+              disabled={tableRows[0].length === 1}
+              title="열 삭제"
+            >
+              열{colIdx + 1} 삭제
+            </button>
+          ))}
+          <button
+            onClick={addColumn}
+            className="px-2 py-1 text-xs font-korean-serif text-brass-2 border border-brass-2/50 rounded-sm hover:bg-brass-2/10 transition-colors"
+          >
+            + 열 추가
+          </button>
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <button
+          onClick={onClose}
+          className="flex-1 rounded-sm border border-brass-2/25 px-4 py-2 font-korean-serif text-sm font-medium text-ink-mute transition-colors hover:border-brass-2/50 hover:text-ink-soft"
+        >
+          취소
+        </button>
+        <button
+          onClick={onSave}
           disabled={isSaving}
           className="flex-1 rounded-sm bg-brass-2 px-4 py-2 font-korean-serif text-sm font-medium text-white transition-colors hover:bg-brass-2/90 disabled:opacity-50"
         >
