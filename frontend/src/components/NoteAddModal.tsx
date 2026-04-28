@@ -7,7 +7,7 @@ type Props = {
   bookId: number
   isOpen: boolean
   onClose: () => void
-  onSuccess?: () => void
+  onSuccess?: (noteId: number) => void
 }
 
 // 노트 종류별 메타데이터 (레이블, 아이콘)
@@ -50,9 +50,9 @@ export default function NoteAddModal({ bookId, isOpen, onClose, onSuccess }: Pro
       }
       // 다른 타입들은 나중에 추가 (현재는 감상과 인용구만 지원)
 
-      addNote(bookId, emptyContent, readDate)
+      const newNoteId = await addNote(bookId, emptyContent, readDate)
       onClose()
-      onSuccess?.()
+      onSuccess?.(newNoteId)
     } finally {
       setIsLoading(false)
     }

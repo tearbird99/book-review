@@ -475,9 +475,9 @@ export default function BookDetailPage() {
         bookId={book.id}
         isOpen={isAddNoteModalOpen}
         onClose={() => setIsAddNoteModalOpen(false)}
-        onSuccess={() => {
+        onSuccess={(noteId) => {
           setIsAddNoteModalOpen(false)
-          // 노트 목록 새로고침
+          setEditingNoteId(noteId)
         }}
       />
     </div>
