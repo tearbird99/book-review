@@ -41,7 +41,8 @@ export default function NoteAddModal({ bookId, isOpen, onClose, onSuccess }: Pro
   const handleAdd = async () => {
     setIsLoading(true)
     try {
-      const emptyContent = JSON.stringify({ type: noteType, data: '' })
+      // 현재는 감상(텍스트)만 지원 - 빈 문자열로 저장
+      const emptyContent = ''
       addNote(bookId, emptyContent, readDate)
       onClose()
       onSuccess?.()

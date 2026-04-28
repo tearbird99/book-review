@@ -541,8 +541,10 @@ function NoteEditor({ note, onClose }: { note: ApiNote; onClose: () => void }) {
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      // TODO: 노트 내용 업데이트 - updateNote 함수 구현 필요
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      const { notesApi } = await import('../lib/api')
+      await notesApi.update(note.id, {
+        content: content,
+      })
       onClose()
     } finally {
       setIsSaving(false)
