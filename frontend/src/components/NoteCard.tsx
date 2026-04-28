@@ -17,6 +17,22 @@ function formatDate(dateStr: string) {
 
 // 노트 카드: 날짜, 내용 표시 + 마우스 호버 시 이동/편집/삭제 버튼 표시
 export default function NoteCard({ note, onEdit, onDelete, onMove, isFirst = false, isLast = false }: Props) {
+  // content 파싱 (JSON 형식일 수 있음)
+  let displayContent = note.content
+  let pageNumber: number | null = null
+
+  try {
+    const parsed = JSON.parse(note.content)
+    if (parsed && typeof parsed === 'object') {
+      displayContent = parsed.content || ''
+      if (parsed.type === 'quote' && parsed.page) {
+        pageNumber = parsed.page
+      }
+    }
+  } catch {
+    displayContent = note.content
+  }
+
   return (
     <article className="group relative flex gap-5 rounded-sm border border-brass-2/15 bg-white/50 px-6 py-5 shadow-[0_2px_12px_-4px_rgba(31,22,51,0.08)] transition-all hover:border-brass-2/30 hover:shadow-[0_4px_20px_-6px_rgba(90,63,160,0.12)]">
       {/* 왼쪽 세로 액센트 바 */}
@@ -29,8 +45,15 @@ export default function NoteCard({ note, onEdit, onDelete, onMove, isFirst = fal
         </time>
 
         <p className="mt-3 font-korean-serif text-sm leading-relaxed text-ink/80 line-clamp-3">
-          {note.content}
+          {displayContent}
         </p>
+
+        {/* 인용구: 우측 하단에 페이지 표시 */}
+        {pageNumber && (
+          <div className="mt-2 text-right">
+            <span className="font-display text-[10px] text-brass-2/60">p. {pageNumber}</span>
+          </div>
+        )}
       </div>
 
       {/* 버튼들 */}

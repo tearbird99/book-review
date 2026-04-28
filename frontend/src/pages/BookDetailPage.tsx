@@ -535,15 +535,44 @@ function BookInfoTab({ book }: { book: Book }) {
 
 // 노트 내용 편집 모드
 function NoteEditor({ note, onClose }: { note: ApiNote; onClose: () => void }) {
-  const [content, setContent] = useState(note.content)
+  // content 파싱 (JSON 형식일 수 있음)
+  let noteData: any = { type: 'text', content: '' }
+  try {
+    const parsed = JSON.parse(note.content)
+    if (parsed && typeof parsed === 'object') {
+      noteData = parsed
+    }
+  } catch {
+    // JSON 파싱 실패 시 그냥 text로 취급
+    noteData = { type: 'text', content: note.content }
+  }
+
+  const [noteContent, setNoteContent] = useState(noteData.content || '')
+  const [notePage, setNotePage] = useState<number | null>(noteData.page || null)
   const [isSaving, setIsSaving] = useState(false)
 
   const handleSave = async () => {
     setIsSaving(true)
     try {
       const { notesApi } = await import('../lib/api')
+
+      // 타입에 따라 content 구성
+      let saveContent = ''
+      if (noteData.type === 'quote') {
+        saveContent = JSON.stringify({
+          type: 'quote',
+          content: noteContent,
+          page: notePage,
+        })
+      } else {
+        saveContent = JSON.stringify({
+          type: 'text',
+          content: noteContent,
+        })
+      }
+
       await notesApi.update(note.id, {
-        content: content,
+        content: saveContent,
       })
       onClose()
     } finally {
@@ -554,7 +583,9 @@ function NoteEditor({ note, onClose }: { note: ApiNote; onClose: () => void }) {
   return (
     <div className="rounded-sm border border-brass-2/30 bg-gradient-to-br from-white to-white/50 px-6 py-5 shadow-[0_2px_12px_-4px_rgba(31,22,51,0.12)]">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-korean-serif text-sm font-semibold text-ink">노트 편집</h3>
+        <h3 className="font-korean-serif text-sm font-semibold text-ink">
+          {noteData.type === 'quote' ? '인용구 편집' : '감상 편집'}
+        </h3>
         <button
           onClick={onClose}
           className="text-ink-mute hover:text-ink transition-colors"
@@ -564,12 +595,29 @@ function NoteEditor({ note, onClose }: { note: ApiNote; onClose: () => void }) {
       </div>
 
       <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
+        value={noteContent}
+        onChange={(e) => setNoteContent(e.target.value)}
         className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
         style={{ height: '200px', resize: 'vertical' }}
-        placeholder="노트 내용을 입력하세요..."
+        placeholder={noteData.type === 'quote' ? '인용문을 입력하세요...' : '감상을 입력하세요...'}
       />
+
+      {/* 인용구 타입일 때만 페이지 입력 필드 표시 */}
+      {noteData.type === 'quote' && (
+        <div className="mt-3">
+          <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute mb-2">
+            페이지
+          </label>
+          <input
+            type="number"
+            value={notePage === null ? '' : notePage}
+            onChange={(e) => setNotePage(e.target.value ? Number(e.target.value) : null)}
+            className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+            placeholder="페이지 번호"
+            min="1"
+          />
+        </div>
+      )}
 
       <div className="flex gap-2 mt-4">
         <button
