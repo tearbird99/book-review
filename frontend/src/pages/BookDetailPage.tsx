@@ -169,7 +169,7 @@ export default function BookDetailPage() {
 
             {/* 기존 오너먼트 (이미지 없을 때만) */}
             {!book.cover_image_url && !coverPreviewUrl && (
-              <div className="absolute inset-0 flex items-center justify-center" style={{ color: book.accent }}>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ color: book.accent }}>
                 <Ornament name={book.ornament} className="h-8 w-8 opacity-60" />
               </div>
             )}
