@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { type ReadStatus, useBooks } from '../contexts/BookContext'
 import BookCard from '../components/BookCard'
 import BookAddModal from '../components/BookAddModal'
@@ -30,6 +30,14 @@ export default function LibraryPage() {
   const [isSearchMode, setIsSearchMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSortOpen, setIsSortOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const ITEMS_PER_PAGE = 15
+
+  // 탭, 정렬, 검색 변경 시 첫 페이지로 리셋
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [active, sortBy, searchQuery])
 
   // 탭과 검색으로 책 목록 필터링
   let filtered = active === 'all' ? books : books.filter((b) => b.read_status === active)
@@ -65,6 +73,12 @@ export default function LibraryPage() {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     }
   })
+
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const endIndex = startIndex + ITEMS_PER_PAGE
+  const displayedBooks = filtered.slice(startIndex, endIndex)
 
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-12">
@@ -212,7 +226,7 @@ export default function LibraryPage() {
 
       {/* 책 카드 그리드 + 신규 추가 버튼 */}
       <section className="mt-8 grid min-h-[1098px] gap-x-6 gap-y-10 grid-cols-2 sm:min-h-[720px] sm:grid-cols-3 md:min-h-[531px] md:grid-cols-4 lg:min-h-[417px] lg:grid-cols-5">
-        {filtered.map((book) => (
+        {displayedBooks.map((book) => (
           <BookCard
             key={book.id}
             book={book}
@@ -220,25 +234,40 @@ export default function LibraryPage() {
             onDelete={() => setIsDeleteMode(false)}
           />
         ))}
-
-        {/* 새 책 추가 카드 */}
-        {!isSearchMode && !isDeleteMode && (
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="group flex aspect-[2/3] flex-col items-center justify-center rounded-[2px] border-2 border-dashed border-brass-2/50 bg-[#ebe5f8] transition-all hover:border-brass-2/80 hover:bg-[#e0d6f5]"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-brass-2/60 text-brass-2 transition-colors group-hover:border-brass-2 group-hover:bg-brass-2/10">
-              <PlusIcon />
-            </div>
-            <span className="mt-3 font-korean-serif text-sm font-medium text-ink-soft group-hover:text-ink">
-              새 책 봉인하기
-            </span>
-            <span className="mt-1 font-display text-[9px] uppercase tracking-[0.3em] text-brass-2/70">
-              Adde Librum
-            </span>
-          </button>
-        )}
       </section>
+
+      {/* 페이지네이션 */}
+      {totalPages > 0 && (
+        <div className="mt-12 flex items-center justify-center gap-2">
+          <button
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className="flex h-8 w-8 items-center justify-center rounded-sm border border-brass-2/25 text-ink-mute disabled:opacity-50 disabled:cursor-not-allowed hover:border-brass-2"
+          >
+            &lt;
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`flex h-8 w-8 items-center justify-center rounded-sm border transition-all ${
+                currentPage === page
+                  ? 'border-brass-2 bg-brass-2/10 text-brass-2'
+                  : 'border-brass-2/25 text-ink-mute hover:border-brass-2'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages}
+            className="flex h-8 w-8 items-center justify-center rounded-sm border border-brass-2/25 text-ink-mute disabled:opacity-50 disabled:cursor-not-allowed hover:border-brass-2"
+          >
+            &gt;
+          </button>
+        </div>
+      )}
 
       {/* 시각적 구분선 */}
       <div className="mt-24 flex items-center justify-center gap-4 opacity-40">
@@ -258,6 +287,20 @@ export default function LibraryPage() {
         onClose={() => setIsAddModalOpen(false)}
         defaultStatus={active === 'all' ? 'to_read' : active}
       />
+
+      {/* 새 책 추가 floating 버튼 */}
+      <div className="fixed bottom-8 right-8 group">
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-brass-2 text-white shadow-lg transition-all hover:bg-brass-2/90"
+          aria-label="새 책 추가"
+        >
+          <PlusIcon />
+        </button>
+        <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block whitespace-nowrap rounded bg-ink px-2 py-1 font-korean-serif text-xs text-white">
+          서재에 책 추가하기
+        </div>
+      </div>
     </div>
   )
 }
