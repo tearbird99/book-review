@@ -11,9 +11,10 @@ const TABS: { key: ReadStatus | 'all'; label: string }[] = [
   { key: 'read', label: '읽은 책' },
 ]
 
-type SortType = 'recent' | 'rating' | 'progress'
+type SortType = 'recent' | 'rating' | 'progress' | 'title'
 
 const SORT_OPTIONS: { key: SortType; label: string }[] = [
+  { key: 'title', label: '제목 가나다순' },
   { key: 'recent', label: '최근 추가 순' },
   { key: 'rating', label: '별점 순' },
   { key: 'progress', label: '독서 진행률 순' },
@@ -56,6 +57,9 @@ export default function LibraryPage() {
       const aProgress = a.total_pages ? a.current_page! / a.total_pages : 0
       const bProgress = b.total_pages ? b.current_page! / b.total_pages : 0
       return bProgress - aProgress
+    } else if (sortBy === 'title') {
+      // 제목 가나다순
+      return a.title.localeCompare(b.title, 'ko')
     } else {
       // 최근 추가 순: created_at DESC
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
