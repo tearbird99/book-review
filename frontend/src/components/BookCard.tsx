@@ -100,16 +100,41 @@ export default function BookCard({ book, deleteMode = false, onDelete }: Props) 
                     <span className="h-px w-4" style={{ backgroundColor: book.accent }} />
                   </div>
                 </div>
-                <div className="font-display text-[9px] tracking-[0.2em]" style={{ color: book.accent + '99' }}>
-                  {book.rating ? '★'.repeat(book.rating) + '☆'.repeat(5 - book.rating) : '— —'}
-                </div>
+                {/* 별점: 읽는 중 or 읽은 책일 때만 표시 */}
+                {(book.read_status === 'reading' || book.read_status === 'read') && (
+                  <div className="font-display text-[9px] tracking-[0.2em]" style={{ color: book.accent + '99' }}>
+                    {book.rating ? '★'.repeat(Math.round(book.rating)) + '☆'.repeat(5 - Math.round(book.rating)) : '— —'}
+                  </div>
+                )}
+                {/* 읽을 책일 때: 공백 유지 */}
+                {book.read_status === 'to_read' && (
+                  <div className="font-display text-[9px] tracking-[0.2em]" style={{ color: book.accent + '99' }}>
+                    &nbsp;
+                  </div>
+                )}
               </div>
             </div>
 
             {/* 카드 하단 메타 */}
             <div className="mt-3 px-1">
               <p className="font-korean-serif text-sm text-ink">{book.title}</p>
-              <p className="mt-0.5 text-xs text-ink-mute">{book.author} · 노트 {book.notes}</p>
+              {book.read_status === 'to_read' ? (
+                <p className="mt-0.5 text-xs text-ink-mute">{book.author} · 노트 {book.notes}</p>
+              ) : (
+                <>
+                  <p className="mt-0.5 text-xs text-ink-mute">
+                    {book.author} · {book.current_page}/{book.total_pages} · 노트 {book.notes}
+                  </p>
+                  <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-brass-2/12">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-brass-2/50 to-brass-2 transition-all"
+                      style={{
+                        width: book.total_pages ? `${Math.round((book.current_page! / book.total_pages) * 100)}%` : '0%',
+                      }}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </article>
         </Link>
