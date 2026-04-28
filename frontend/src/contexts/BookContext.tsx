@@ -127,7 +127,11 @@ export function BookProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // UI용 books 계산
-  const books: Book[] = apiBooks.map((apiBook) => enrichBook(apiBook, notes))
+  const books: Book[] = apiBooks.map((apiBook) => {
+    const enriched = enrichBook(apiBook, notes)
+    console.log(`Book: ${enriched.title}, Rating: ${enriched.rating}, ApiRating: ${apiBook.rating}`)
+    return enriched
+  })
 
   // 책 추가
   const addBook = async (data: BookFormData): Promise<{ bookId: number; noteId: number }> => {

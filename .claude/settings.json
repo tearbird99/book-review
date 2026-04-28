@@ -10,7 +10,8 @@
       "Bash(curl -s http://localhost:8000/api/books)",
       "Bash(docker-compose restart *)",
       "Bash(find c:\\\\\\\\Users\\\\\\\\youji\\\\\\\\Dev\\\\\\\\book-review\\\\\\\\frontend\\\\\\\\src -type f -name \"*.tsx\" -o -name \"*.ts\")",
-      "Bash(docker-compose logs *)"
+      "Bash(docker-compose logs *)",
+      "Bash(docker-compose -f c:/Users/youji/Dev/book-review/docker-compose.yml logs backend --tail=30)"
     ]
   }
 }

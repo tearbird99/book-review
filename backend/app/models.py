@@ -25,7 +25,6 @@ class BookBase(SQLModel):
     total_pages: Optional[int] = None
     current_page: Optional[int] = 0
     read_status: ReadStatus = ReadStatus.TO_READ
-    rating: Optional[float] = 4.0
 
 
 class Book(BookBase, table=True):
@@ -34,6 +33,7 @@ class Book(BookBase, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    rating: Optional[float] = Field(default=4.0)
 
     # 관계: 책 → 노트들
     notes: List["Note"] = Relationship(back_populates="book")
@@ -41,7 +41,7 @@ class Book(BookBase, table=True):
 
 class BookCreate(BookBase):
     """책 생성 스키마"""
-    pass
+    rating: Optional[float] = 4.0
 
 
 class BookUpdate(SQLModel):
@@ -60,6 +60,7 @@ class BookRead(BookBase):
     """책 조회 스키마 (id, created_at 포함)"""
     id: int
     created_at: datetime
+    rating: Optional[float] = 4.0
 
 
 # ============================================================================
