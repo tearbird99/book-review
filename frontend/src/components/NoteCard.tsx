@@ -1,7 +1,7 @@
-import type { MockNote } from '../data/mockNotes'
+import type { ApiNote } from '../types/api'
 
 type Props = {
-  note: MockNote
+  note: ApiNote
   onEdit?: (noteId: number) => void
   onDelete?: (noteId: number) => void
   onMove?: (noteId: number, direction: 'up' | 'down') => void
