@@ -24,7 +24,7 @@ async def export_order_zip(
     포함 내용:
     - order.json: 주문 메타 정보
     - manifest.json: 파일 인덱스 (path, sha256, size)
-    - notes/: 주문에 포함된 노트들 (JSON)
+    - books/: 주문에 포함된 책들 (JSON)
     - images/: 관련 책 표지 이미지
     """
     order = session.get(Order, order_id)

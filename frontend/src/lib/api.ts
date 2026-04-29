@@ -119,6 +119,9 @@ export const ordersApi = {
   // 주문의 노트 목록 조회
   getItems: (id: number) => apiClient.get<ApiOrderItem[]>(`/orders/${id}/items`),
 
+  // 주문 삭제
+  delete: (id: number) => apiClient.delete(`/orders/${id}`),
+
   // 주문 ZIP 다운로드 (Lv3)
   exportZip: (id: number) => apiClient.get(`/exports/${id}/export`, {
     responseType: 'blob',

@@ -73,6 +73,24 @@ export default function OrdersPage() {
     }
   }
 
+  // 주문 삭제
+  const handleDeleteOrder = async (orderId: number, orderTitle: string) => {
+    if (!confirm(`"${orderTitle}" 주문을 삭제하시겠습니까?`)) {
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      await ordersApi.delete(orderId)
+      await loadOrders()
+    } catch (error) {
+      console.error('주문 삭제 실패:', error)
+      alert('주문 삭제에 실패했습니다')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   // ZIP 다운로드
   const handleDownloadZip = async (orderId: number, orderTitle: string) => {
     try {
@@ -173,6 +191,13 @@ export default function OrdersPage() {
                       className="rounded-sm bg-brass-2/10 px-3 py-2 font-korean-serif text-xs text-brass-2 transition-colors hover:bg-brass-2/20 disabled:opacity-50"
                     >
                       📥 ZIP 다운로드
+                    </button>
+                    <button
+                      onClick={() => handleDeleteOrder(order.id, order.title)}
+                      disabled={isLoading}
+                      className="rounded-sm border border-red-300 px-3 py-2 font-korean-serif text-xs text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+                    >
+                      🗑️ 삭제
                     </button>
                   </div>
                 </div>

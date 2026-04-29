@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from sqlmodel import Session, select
 
-from ..models import Order, OrderItem, Book
+from ..models import Order, OrderItem, Book, Note
 
 
 # ============================================================================
@@ -72,6 +72,11 @@ async def create_order_zip(order: Order, session: Session) -> io.BytesIO:
             if book.id not in collected_books:
                 collected_books[book.id] = book
 
+            # 책의 노트들 조회
+            notes = session.execute(
+                select(Note).where(Note.book_id == book.id)
+            ).scalars().all()
+
             # 책 JSON 생성 (position 기반 파일명: 001, 002, ...)
             book_filename = f"{item.position:03d}_{book.id}.json"
             book_json = {
@@ -87,6 +92,17 @@ async def create_order_zip(order: Order, session: Session) -> io.BytesIO:
                 "total_pages": book.total_pages,
                 "current_page": book.current_page,
                 "created_at": book.created_at.isoformat(),
+                "notes": [
+                    {
+                        "id": note.id,
+                        "content": note.content,
+                        "rating": note.rating,
+                        "read_date": note.read_date,
+                        "created_at": note.created_at.isoformat(),
+                        "updated_at": note.updated_at.isoformat(),
+                    }
+                    for note in notes
+                ]
             }
             book_json_str = json.dumps(book_json, ensure_ascii=False, indent=2)
             book_json_bytes = book_json_str.encode("utf-8")

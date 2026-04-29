@@ -116,6 +116,29 @@ async def update_order_status(
     return order
 
 # ============================================================================
+# 주문 삭제
+# ============================================================================
+@router.delete("/{order_id}")
+async def delete_order(order_id: int, session: Session = Depends(get_session)):
+    """주문 삭제"""
+    order = session.get(Order, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="주문을 찾을 수 없습니다")
+
+    # 주문 항목 먼저 삭제
+    items = session.execute(
+        select(OrderItem).where(OrderItem.order_id == order_id)
+    ).scalars().all()
+    for item in items:
+        session.delete(item)
+
+    # 주문 삭제
+    session.delete(order)
+    session.commit()
+
+    return {"message": "주문이 삭제되었습니다"}
+
+# ============================================================================
 # 주문의 노트 목록 조회 (Lv3 ZIP 생성 시 사용)
 # ============================================================================
 @router.get("/{order_id}/items", response_model=List)

@@ -22,7 +22,10 @@
       "Bash(python -c \"import sys, json; data = json.load\\(sys.stdin\\); print\\(f'총 주문: {len\\(data\\)}'\\); [print\\(f'  - {o[\\\\\"title\\\\\"]} \\(ID:{o[\\\\\"id\\\\\"]}, 상태:{o[\\\\\"status\\\\\"]}\\)'\\) for o in data]\")",
       "Bash(python -c \"import sys, json; items = json.load\\(sys.stdin\\); print\\('Order 1 Items \\(books\\):'\\); [print\\(f'  {i[\\\\\"position\\\\\"]}. Book ID: {i[\\\\\"book_id\\\\\"]}'\\) for i in items]\")",
       "Bash(curl -s http://localhost:8000/api/orders/2/items)",
-      "Bash(python -c \"import sys, json; items = json.load\\(sys.stdin\\); print\\('Order 2 Items \\(books\\):'\\); [print\\(f'  {i[\\\\\"position\\\\\"]}. Book ID: {i[\\\\\"book_id\\\\\"]}'\\) for i in items]\")"
+      "Bash(python -c \"import sys, json; items = json.load\\(sys.stdin\\); print\\('Order 2 Items \\(books\\):'\\); [print\\(f'  {i[\\\\\"position\\\\\"]}. Book ID: {i[\\\\\"book_id\\\\\"]}'\\) for i in items]\")",
+      "Read(//c/Users/youji/Downloads/주문 03_3/books/**)",
+      "Bash(docker exec *)",
+      "Bash(curl -s 'http://localhost:8000/api/notes?book_id=1')"
     ]
   }
 }
