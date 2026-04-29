@@ -554,16 +554,7 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
     }
     return [['', ''], ['', '']]
   })
-  const [diagramData, setDiagramData] = useState(() => {
-    if (noteData.type === 'diagram' && typeof noteData.content === 'string') {
-      try {
-        return JSON.parse(noteData.content)
-      } catch {
-        return { nodes: [], edges: [], nextId: 1 }
-      }
-    }
-    return noteData.type === 'diagram' ? noteData.content : { nodes: [], edges: [], nextId: 1 }
-  })
+  const [diagramData, setDiagramData] = useState(noteData.type === 'diagram' ? noteData.content : '{"nodes":[],"edges":[],"nextId":1}')
   const [isSaving, setIsSaving] = useState(false)
 
   // 오늘 날짜 (max date)

@@ -32,8 +32,8 @@ const handleStyles = `
 `
 
 type Props = {
-  initialData?: string | { nodes: any[]; edges: any[]; nextId?: number }
-  onSave: (data: any) => void
+  initialData?: string
+  onSave: (data: string) => void
 }
 
 // 노드 렌더링 컴포넌트
@@ -136,7 +136,7 @@ export default function DiagramEditor({ initialData, onSave }: Props) {
   useEffect(() => {
     if (initialData) {
       try {
-        let parsed = typeof initialData === 'string' ? JSON.parse(initialData) : initialData
+        const parsed = JSON.parse(initialData)
         if (parsed.nodes && Array.isArray(parsed.nodes) && parsed.nodes.length > 0) {
           const loadedNodes = parsed.nodes.map((n: any) => ({
             ...n,
@@ -221,7 +221,7 @@ export default function DiagramEditor({ initialData, onSave }: Props) {
       edges,
       nextId: nodeIdCounter,
     }
-    onSave(data)
+    onSave(JSON.stringify(data))
   }
 
   return (
