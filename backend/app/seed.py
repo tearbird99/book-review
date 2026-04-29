@@ -38,7 +38,9 @@ def seed_data():
                 "total_pages": 256,
                 "current_page": 256,
                 "read_status": "read",
-                "rating": 5.0
+                "rating": 5.0,
+                "start_date": "2026-03-25",
+                "end_date": "2026-04-08"
             },
             {
                 "title": "데미안",
@@ -48,7 +50,9 @@ def seed_data():
                 "total_pages": 200,
                 "current_page": 200,
                 "read_status": "read",
-                "rating": 4.0
+                "rating": 4.0,
+                "start_date": "2026-02-20",
+                "end_date": "2026-03-10"
             },
             {
                 "title": "코스모스",
@@ -58,7 +62,8 @@ def seed_data():
                 "total_pages": 719,
                 "current_page": 342,
                 "read_status": "reading",
-                "rating": 5.0
+                "rating": 5.0,
+                "start_date": "2026-04-10"
             },
             {
                 "title": "모모",
@@ -68,7 +73,8 @@ def seed_data():
                 "total_pages": 480,
                 "current_page": 180,
                 "read_status": "reading",
-                "rating": 4.0
+                "rating": 4.0,
+                "start_date": "2026-04-20"
             },
             {
                 "title": "어린 왕자",

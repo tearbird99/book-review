@@ -4,6 +4,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
 
+# 모든 모델을 import해서 SQLModel.metadata에 등록
+from .models import Book, Note, Order, OrderItem
+
 # 데이터베이스 경로 설정
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/app.db")
 

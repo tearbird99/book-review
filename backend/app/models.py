@@ -25,6 +25,8 @@ class BookBase(SQLModel):
     total_pages: Optional[int] = None
     current_page: Optional[int] = 0
     read_status: ReadStatus = ReadStatus.TO_READ
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
 
 
 class Book(BookBase, table=True):
@@ -54,6 +56,8 @@ class BookUpdate(SQLModel):
     current_page: Optional[int] = None
     read_status: Optional[ReadStatus] = None
     rating: Optional[float] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
 
 
 class BookRead(BookBase):
