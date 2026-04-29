@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useBooks } from '../contexts/BookContext'
 
-type NoteType = 'text' | 'quote' | 'table' | 'diagram'
+type NoteType = 'text' | 'quote' | 'table' | 'image'
 
 type Props = {
   bookId: number
@@ -15,7 +15,7 @@ const NOTE_TYPES = [
   { id: 'text', label: '감상', icon: '📝' },
   { id: 'quote', label: '인용구', icon: '💬' },
   { id: 'table', label: '표', icon: '📊' },
-  { id: 'diagram', label: '다이어그램', icon: '📐' },
+  { id: 'image', label: '이미지', icon: '🖼️' },
 ]
 
 // 노트 추가 팝업: 종류와 작성 날짜만 선택하고 빈 노트 생성
@@ -45,8 +45,11 @@ export default function NoteAddModal({ bookId, isOpen, onClose, onSuccess }: Pro
         emptyContent = JSON.stringify({ type: 'text', content: '' })
       } else if (noteType === 'quote') {
         emptyContent = JSON.stringify({ type: 'quote', content: '', page: null })
+      } else if (noteType === 'table') {
+        emptyContent = JSON.stringify({ type: 'table', content: [['', ''], ['', '']] })
+      } else if (noteType === 'image') {
+        emptyContent = JSON.stringify({ type: 'image', content: '' })
       }
-      // 다른 타입들은 나중에 추가 (현재는 감상과 인용구만 지원)
 
       // emptyContent가 비어있으면 기본값으로 설정
       if (!emptyContent) {

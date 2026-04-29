@@ -18,7 +18,7 @@ function getNoteTypeInfo(type: string): { label: string; icon: string } {
     text: { label: '감상', icon: '📝' },
     quote: { label: '인용구', icon: '💬' },
     table: { label: '표', icon: '📊' },
-    diagram: { label: '다이어그램', icon: '📐' },
+    image: { label: '이미지', icon: '🖼️' },
   }
   return typeMap[type] || { label: '메모', icon: '📌' }
 }
@@ -42,6 +42,8 @@ export default function NoteCard({ note, onEdit, onDelete }: Props) {
         }
       } else if (noteType === 'table') {
         tableData = parsed.content || []
+      } else if (noteType === 'image') {
+        displayContent = '[이미지]'
       } else {
         displayContent = parsed.content || ''
       }

@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npm --version)",
       "Bash(npm --prefix c:/Users/youji/Dev/book-review/frontend install)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Read(//c/Users/youji/.claude/projects/c--Users-youji-Dev-book-review/memory/**)",
+      "Bash(git commit -m 'feat: React Flow 기반 다이어그램 에디터 구현 *)"
     ]
   }
 }
