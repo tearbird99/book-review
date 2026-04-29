@@ -16,7 +16,13 @@
       "Bash(python -c \"import sys, json; data = json.load\\(sys.stdin\\); book = data[0]; print\\(f'Book: {book[\\\\\"title\\\\\"]}'\\); print\\(f'Status: {book[\\\\\"read_status\\\\\"]}'\\); print\\(f'Start: {book.get\\(\\\\\"start_date\\\\\", \\\\\"N/A\\\\\"\\)}'\\); print\\(f'End: {book.get\\(\\\\\"end_date\\\\\", \\\\\"N/A\\\\\"\\)}'\\)\")",
       "Bash(python)",
       "Bash(docker-compose ps *)",
-      "Bash(python -c \"import sys, json; data = json.load\\(sys.stdin\\); book = data[0]; print\\(f'Book: {book[\\\\\"title\\\\\"]}, Read Status: {book[\\\\\"read_status\\\\\"]}, Start: {book.get\\(\\\\\"start_date\\\\\"\\)}, End: {book.get\\(\\\\\"end_date\\\\\"\\)}'\\)\")"
+      "Bash(python -c \"import sys, json; data = json.load\\(sys.stdin\\); book = data[0]; print\\(f'Book: {book[\\\\\"title\\\\\"]}, Read Status: {book[\\\\\"read_status\\\\\"]}, Start: {book.get\\(\\\\\"start_date\\\\\"\\)}, End: {book.get\\(\\\\\"end_date\\\\\"\\)}'\\)\")",
+      "Bash(curl -s http://localhost:8000/api/orders/1/items)",
+      "Bash(python -c \"import sys, json; data = json.load\\(sys.stdin\\); print\\(json.dumps\\(data[0] if data else {}, indent=2, ensure_ascii=False\\)\\)\")",
+      "Bash(python -c \"import sys, json; data = json.load\\(sys.stdin\\); print\\(f'총 주문: {len\\(data\\)}'\\); [print\\(f'  - {o[\\\\\"title\\\\\"]} \\(ID:{o[\\\\\"id\\\\\"]}, 상태:{o[\\\\\"status\\\\\"]}\\)'\\) for o in data]\")",
+      "Bash(python -c \"import sys, json; items = json.load\\(sys.stdin\\); print\\('Order 1 Items \\(books\\):'\\); [print\\(f'  {i[\\\\\"position\\\\\"]}. Book ID: {i[\\\\\"book_id\\\\\"]}'\\) for i in items]\")",
+      "Bash(curl -s http://localhost:8000/api/orders/2/items)",
+      "Bash(python -c \"import sys, json; items = json.load\\(sys.stdin\\); print\\('Order 2 Items \\(books\\):'\\); [print\\(f'  {i[\\\\\"position\\\\\"]}. Book ID: {i[\\\\\"book_id\\\\\"]}'\\) for i in items]\")"
     ]
   }
 }
