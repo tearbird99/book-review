@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { type ReadStatus, useBooks } from '../contexts/BookContext'
 import BookCard from '../components/BookCard'
 import BookAddModal from '../components/BookAddModal'
@@ -22,6 +23,7 @@ const SORT_OPTIONS: { key: SortType; label: string }[] = [
 
 // 서재 메인 페이지: 책 목록, 필터링, 검색, 삭제 모드, 신규 추가
 export default function LibraryPage() {
+  const navigate = useNavigate()
   const { books } = useBooks()
   const [active, setActive] = useState<ReadStatus | 'all'>('all')
   const [sortBy, setSortBy] = useState<SortType>('recent')
@@ -140,7 +142,7 @@ export default function LibraryPage() {
             </div>
           </div>
           <div className="relative group">
-            <IconButton ariaLabel="주문">
+            <IconButton ariaLabel="주문" onClick={() => navigate('/orders')}>
               <ScrollIcon />
             </IconButton>
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block whitespace-nowrap rounded bg-ink px-2 py-1 font-korean-serif text-xs text-white">
@@ -316,12 +318,15 @@ export default function LibraryPage() {
 function IconButton({
   children,
   ariaLabel,
+  onClick,
 }: {
   children: React.ReactNode
   ariaLabel: string
+  onClick?: () => void
 }) {
   return (
     <button
+      onClick={onClick}
       aria-label={ariaLabel}
       className="flex h-10 w-10 items-center justify-center rounded-full border border-brass-2/35 text-ink-soft transition-all hover:border-brass-2 hover:text-brass-2"
     >

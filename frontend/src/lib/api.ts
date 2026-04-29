@@ -116,7 +116,7 @@ export const ordersApi = {
   getItems: (id: number) => apiClient.get<ApiOrderItem[]>(`/orders/${id}/items`),
 
   // 주문 ZIP 다운로드 (Lv3)
-  exportZip: (id: number) => apiClient.get(`/orders/${id}/export`, {
+  exportZip: (id: number) => apiClient.get(`/exports/${id}/export`, {
     responseType: 'blob',
   }),
 };
