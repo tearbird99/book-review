@@ -186,14 +186,18 @@ book-review/
 - **State Management**: React Context API
 - **Routing**: React Router
 - **HTTP Client**: Axios
-- **Image Handling**: Canvas API + Drag & Resize
+- **Image Handling**: File API (FileReader) + Mouse Events + Aspect Ratio Preservation
 
 ### Backend
-- **Framework**: FastAPI (Python)
+- **Framework**: FastAPI (Python) with Uvicorn
 - **ORM**: SQLModel (SQLAlchemy + Pydantic)
 - **Database**: SQLite
 - **File Storage**: Docker Volume (`/data/`)
-- **Utilities**: python-multipart (파일 업로드)
+- **Utilities**: 
+  - python-multipart (파일 업로드)
+  - python-dotenv (환경 변수 관리)
+  - pytest (테스트)
+  - httpx (HTTP 클라이언트)
 
 ### Architecture
 ```
@@ -214,8 +218,10 @@ Frontend (React) ← HTTP ↔ Backend (FastAPI) ← SQLite
 
 | AI 도구 | 활용 내용 |
 |---------|----------|
-| **Claude Code (Haiku 4.5)** | 전체 풀스택 개발 담당: 프로젝트 초기 구조 설계, 백엔드 모델/라우터/서비스 로직 구현, React 컴포넌트 및 상태관리 구현, 표지 이미지 업로드(multipart), React Flow 다이어그램, ContentEditable 텍스트 편집 기능, 날짜 필드 데이터베이스 스키마 동기화, 주문 시스템 노트→책 단위 변경, ZIP 익스포트 서비스 구현, Docker 설정 및 배포 구조, 버그 수정 및 기술 문제 해결 |
+| **Claude Code (Haiku 4.5)** | 전체 풀스택 개발 담당: 프로젝트 초기 구조 설계, 백엔드 모델/라우터/서비스 로직 구현, React 컴포넌트 및 상태관리 구현, 표지 이미지 업로드(multipart), Textarea 기반 노트 편집, 날짜 필드 데이터베이스 스키마 동기화, 주문 시스템 노트→책 단위 변경, ZIP 익스포트 서비스 구현, Docker 설정 및 배포 구조, 버그 수정 및 기술 문제 해결 |
 | **Claude Code (Sonnet 4.6)** | 파이프라인 최적화: 대규모 코드 리팩토링, 복잡한 마이그레이션 작업, 다중 파일 동시 수정, /ultrareview를 통한 코드 품질 검토 |
+| **ChatGPT** | 이미지 생성: 웹서비스 로고 아이콘 및 favicon 이미지 생성 |
+| **Google Gemini** | 문서 작성: 과제 안내문을 markdown 형식으로 변환, 이를 토대로 PRD(제품 요구사항) 문서 작성 및 Claude Code에 학습 제공 |
 
 ---
 
