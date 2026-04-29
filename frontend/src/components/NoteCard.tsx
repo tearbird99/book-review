@@ -19,8 +19,6 @@ function getNoteTypeInfo(type: string): { label: string; icon: string } {
     quote: { label: '인용구', icon: '💬' },
     table: { label: '표', icon: '📊' },
     diagram: { label: '다이어그램', icon: '📐' },
-    mindmap: { label: '마인드맵', icon: '🧠' },
-    relationship: { label: '인물관계도', icon: '👥' },
   }
   return typeMap[type] || { label: '메모', icon: '📌' }
 }

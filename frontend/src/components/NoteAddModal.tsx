@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useBooks } from '../contexts/BookContext'
 
-type NoteType = 'text' | 'quote' | 'table' | 'diagram' | 'mindmap' | 'relationship'
+type NoteType = 'text' | 'quote' | 'table' | 'diagram'
 
 type Props = {
   bookId: number
@@ -15,8 +15,7 @@ const NOTE_TYPES = [
   { id: 'text', label: '감상', icon: '📝' },
   { id: 'quote', label: '인용구', icon: '💬' },
   { id: 'table', label: '표', icon: '📊' },
-  { id: 'mindmap', label: '마인드맵', icon: '🧠' },
-  { id: 'relationship', label: '인물관계도', icon: '👥' },
+  { id: 'diagram', label: '다이어그램', icon: '📐' },
 ]
 
 // 노트 추가 팝업: 종류와 작성 날짜만 선택하고 빈 노트 생성
@@ -86,7 +85,7 @@ export default function NoteAddModal({ bookId, isOpen, onClose, onSuccess }: Pro
             <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute mb-3">
               노트 종류
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {NOTE_TYPES.map((type) => (
                 <button
                   key={type.id}

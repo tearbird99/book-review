@@ -5,6 +5,7 @@ import type { ApiNote } from '../types/api'
 import NoteCard from '../components/NoteCard'
 import Ornament from '../components/Ornament'
 import NoteAddModal from '../components/NoteAddModal'
+import DiagramEditor from '../components/DiagramEditor'
 
 type Tab = 'notes' | 'info'
 
@@ -553,6 +554,7 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
     }
     return [['', ''], ['', '']]
   })
+  const [diagramData, setDiagramData] = useState(noteData.type === 'diagram' ? noteData.content : '{"nodes":[],"edges":[]}')
   const [isSaving, setIsSaving] = useState(false)
 
   // 오늘 날짜 (max date)
@@ -575,6 +577,11 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
           type: 'table',
           content: tableRows,
         })
+      } else if (noteData.type === 'diagram') {
+        saveContent = JSON.stringify({
+          type: 'diagram',
+          content: diagramData,
+        })
       } else {
         saveContent = JSON.stringify({
           type: noteData.type,
@@ -595,6 +602,40 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
 
   if (noteData.type === 'table') {
     return <TableEditor tableRows={tableRows} setTableRows={setTableRows} onClose={onClose} onSave={handleSave} isSaving={isSaving} />
+  }
+
+  if (noteData.type === 'diagram') {
+    return (
+      <div className="rounded-sm border border-brass-2/30 bg-gradient-to-br from-white to-white/50 px-6 py-5 shadow-[0_2px_12px_-4px_rgba(31,22,51,0.12)]">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-korean-serif text-sm font-semibold text-ink">다이어그램 편집</h3>
+          <button onClick={onClose} className="text-ink-mute hover:text-ink transition-colors">
+            ✕
+          </button>
+        </div>
+        <DiagramEditor
+          initialData={diagramData}
+          onSave={(data) => {
+            setDiagramData(data)
+          }}
+        />
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={onClose}
+            className="flex-1 rounded-sm border border-slate-400 px-4 py-2 font-korean-serif text-sm font-medium text-ink-mute transition-colors hover:border-brass-2/50 hover:text-ink-soft"
+          >
+            취소
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="flex-1 rounded-sm bg-brass-2 px-4 py-2 font-korean-serif text-sm font-medium text-white transition-colors hover:bg-brass-2/90 disabled:opacity-50"
+          >
+            {isSaving ? '저장 중...' : '저장'}
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
