@@ -5,7 +5,18 @@
       "Bash(npm --prefix c:/Users/youji/Dev/book-review/frontend install)",
       "Bash(npm install *)",
       "Read(//c/Users/youji/.claude/projects/c--Users-youji-Dev-book-review/memory/**)",
-      "Bash(git commit -m 'feat: React Flow 기반 다이어그램 에디터 구현 *)"
+      "Bash(git commit -m 'feat: React Flow 기반 다이어그램 에디터 구현 *)",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s http://localhost:8000/api/books/1)",
+      "Bash(python -c \"import sys, json; data = json.load\\(sys.stdin\\); print\\(json.dumps\\(data, indent=2, ensure_ascii=False\\)\\)\")",
+      "Bash(docker-compose exec *)",
+      "Bash(python3 -c \"from app.models import Book; print\\('BookBase fields:', [f for f in Book.__fields__.keys\\(\\)]\\)\")",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(git commit -m 'fix: 날짜 필드 데이터베이스 스키마 동기화 및 모델 임포트 순서 수정 *)",
+      "Bash(python -c \"import sys, json; data = json.load\\(sys.stdin\\); book = data[0]; print\\(f'Book: {book[\\\\\"title\\\\\"]}'\\); print\\(f'Status: {book[\\\\\"read_status\\\\\"]}'\\); print\\(f'Start: {book.get\\(\\\\\"start_date\\\\\", \\\\\"N/A\\\\\"\\)}'\\); print\\(f'End: {book.get\\(\\\\\"end_date\\\\\", \\\\\"N/A\\\\\"\\)}'\\)\")",
+      "Bash(python)",
+      "Bash(docker-compose ps *)",
+      "Bash(python -c \"import sys, json; data = json.load\\(sys.stdin\\); book = data[0]; print\\(f'Book: {book[\\\\\"title\\\\\"]}, Read Status: {book[\\\\\"read_status\\\\\"]}, Start: {book.get\\(\\\\\"start_date\\\\\"\\)}, End: {book.get\\(\\\\\"end_date\\\\\"\\)}'\\)\")"
     ]
   }
 }

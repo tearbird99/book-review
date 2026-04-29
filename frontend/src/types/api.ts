@@ -10,6 +10,8 @@ export interface ApiBook {
   current_page?: number;
   read_status: 'to_read' | 'reading' | 'read';
   rating?: number;
+  start_date?: string;
+  end_date?: string;
   created_at: string;
 }
 

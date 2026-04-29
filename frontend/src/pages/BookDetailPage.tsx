@@ -71,7 +71,7 @@ export default function BookDetailPage() {
       setCoverPreviewUrl(null)
     }
 
-    updateBook(book.id, bookToUpdate)
+    await updateBook(book.id, bookToUpdate)
     setIsEditMode(false)
   }
 
@@ -270,10 +270,16 @@ export default function BookDetailPage() {
                   value={'★'.repeat(Math.round(book.rating)) + '☆'.repeat(5 - Math.round(book.rating))}
                 />
               )}
-              {notes.length > 0 && (
+              {book.read_status === 'reading' && book.start_date && (
                 <StatBadge
-                  label="최근 독서"
-                  value={notes[notes.length - 1].read_date.replace(/-/g, '.')}
+                  label="읽는 중"
+                  value={book.start_date.replace(/-/g, '.')}
+                />
+              )}
+              {book.read_status === 'read' && book.start_date && book.end_date && (
+                <StatBadge
+                  label="독서 기간"
+                  value={`${book.start_date.replace(/-/g, '.')}~${book.end_date.replace(/-/g, '.')}`}
                 />
               )}
             </div>
@@ -325,19 +331,42 @@ export default function BookDetailPage() {
                   </div>
                 </div>
               )}
-              {editedBook.read_status !== 'to_read' && (
+              {editedBook.read_status === 'reading' && (
+                <div>
+                  <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">독서 시작 날짜</label>
+                  <input
+                    type="date"
+                    value={editedBook.start_date || ''}
+                    onChange={(e) => setEditedBook({ ...editedBook, start_date: e.target.value || undefined })}
+                    className="mt-2 w-full rounded-sm border border-slate-400 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                  />
+                </div>
+              )}
+              {editedBook.read_status === 'read' && (
                 <>
                   <div>
-                    <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">읽은 날짜</label>
+                    <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">독서 시작 날짜</label>
                     <input
                       type="date"
-                      value={notes.length > 0 ? notes[notes.length - 1].read_date : ''}
-                      onChange={() => {
-                        // This would update the note's read_date in a real implementation
-                      }}
+                      value={editedBook.start_date || ''}
+                      onChange={(e) => setEditedBook({ ...editedBook, start_date: e.target.value || undefined })}
                       className="mt-2 w-full rounded-sm border border-slate-400 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
                     />
                   </div>
+                  <div>
+                    <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">독서 종료 날짜</label>
+                    <input
+                      type="date"
+                      value={editedBook.end_date || ''}
+                      onChange={(e) => setEditedBook({ ...editedBook, end_date: e.target.value || undefined })}
+                      className="mt-2 w-full rounded-sm border border-slate-400 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+                    />
+                  </div>
+                </>
+              )}
+              {editedBook.read_status !== 'to_read' && (
+                <>
+                  {/* 읽은 날짜 필드는 제거되었으므로, 전체 페이지와 읽은 페이지로 바로 진행 */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute">전체 페이지</label>
@@ -507,19 +536,29 @@ function EmptyNotes() {
   )
 }
 
-// 책 정보 탭 (제목, 저자, 분류, 등록일)
+// 책 정보 탭 (제목, 저자, 분류, 독서 날짜)
 function BookInfoTab({ book }: { book: Book }) {
+  const items: [string, string][] = [
+    ['제목', book.title],
+    ['저자', book.author],
+    ['분류', book.category],
+  ]
+
+  if (book.read_status === 'reading' && book.start_date) {
+    items.push(['독서 시작', book.start_date.replace(/-/g, '.')])
+  }
+
+  if (book.read_status === 'read') {
+    if (book.start_date) items.push(['독서 시작', book.start_date.replace(/-/g, '.')])
+    if (book.end_date) items.push(['독서 종료', book.end_date.replace(/-/g, '.')])
+  }
+
   return (
     <div className="rounded-sm border border-brass-2/15 bg-white/50 px-6 py-5">
       <dl className="flex flex-col gap-4">
-        {[
-          ['제목', book.title],
-          ['저자', book.author],
-          ['분류', book.category],
-          ['등록일', '2026.03.01'],
-        ].map(([term, desc]) => (
+        {items.map(([term, desc]) => (
           <div key={term} className="flex gap-6">
-            <dt className="w-16 shrink-0 font-display text-[10px] uppercase tracking-[0.2em] text-ink-mute pt-0.5">
+            <dt className="w-20 shrink-0 font-display text-[10px] uppercase tracking-[0.2em] text-ink-mute pt-0.5">
               {term}
             </dt>
             <dd className="font-korean-serif text-sm text-ink">{desc}</dd>

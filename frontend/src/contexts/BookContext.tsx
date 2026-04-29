@@ -19,6 +19,8 @@ export type Book = {
   ornament: 'star' | 'moon' | 'eye' | 'rune' | 'flame'
   category: string
   cover_image_url?: string
+  start_date?: string
+  end_date?: string
   created_at: string
 }
 
@@ -88,6 +90,8 @@ const enrichBook = (apiBook: ApiBook, notes: MockNote[]): Book => {
     ornament: styles.ornament,
     category: apiBook.category || '',
     cover_image_url: apiBook.cover_image_url,
+    start_date: apiBook.start_date,
+    end_date: apiBook.end_date,
     created_at: apiBook.created_at,
   }
 }
@@ -146,6 +150,8 @@ export function BookProvider({ children }: { children: ReactNode }) {
         current_page: data.current_page || 0,
         read_status: data.read_status,
         rating: data.read_status === 'to_read' ? null : data.rating,
+        start_date: data.start_date,
+        end_date: data.end_date,
       })
 
       const bookId = newBook.data.id
@@ -240,6 +246,8 @@ export function BookProvider({ children }: { children: ReactNode }) {
       if (updates.read_status) updateData.read_status = updates.read_status
       if (updates.rating !== undefined) updateData.rating = updates.rating
       if (updates.cover_image_url !== undefined) updateData.cover_image_url = updates.cover_image_url
+      if (updates.start_date !== undefined) updateData.start_date = updates.start_date
+      if (updates.end_date !== undefined) updateData.end_date = updates.end_date
 
       const updatedBook = await booksApi.update(bookId, updateData)
       setApiBooks(apiBooks.map((b) => (b.id === bookId ? updatedBook.data : b)))

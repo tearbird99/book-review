@@ -30,6 +30,8 @@ export const booksApi = {
     current_page?: number;
     read_status?: string;
     rating?: number | null;
+    start_date?: string;
+    end_date?: string;
   }) => apiClient.post<ApiBook>('/books', data),
 
   // 책 수정
@@ -42,6 +44,8 @@ export const booksApi = {
     current_page: number;
     read_status: string;
     rating: number | null;
+    start_date: string;
+    end_date: string;
   }>) => apiClient.put<ApiBook>(`/books/${id}`, data),
 
   // 책 삭제
