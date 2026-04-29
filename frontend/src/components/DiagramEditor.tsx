@@ -42,8 +42,7 @@ function DiagramNode({ data, isConnectable }: any) {
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(label)
   const inputRef = useRef<HTMLInputElement>(null)
-  const clickCountRef = useRef(0)
-  const clickTimeoutRef = useRef<number | null>(null)
+  const lastClickTimeRef = useRef(0)
 
   const handleSaveEdit = useCallback(() => {
     const newLabel = editValue.trim() || '새 항목'
@@ -73,18 +72,12 @@ function DiagramNode({ data, isConnectable }: any) {
     if (isEditing) return
     e.stopPropagation()
 
-    clickCountRef.current += 1
+    const now = Date.now()
+    const isDoubleClick = now - lastClickTimeRef.current < 300
+    lastClickTimeRef.current = now
 
-    if (clickTimeoutRef.current) {
-      clearTimeout(clickTimeoutRef.current)
-    }
-
-    clickTimeoutRef.current = window.setTimeout(() => {
-      clickCountRef.current = 0
-    }, 300)
-
-    if (clickCountRef.current === 2) {
-      clickCountRef.current = 0
+    if (isDoubleClick) {
+      e.preventDefault()
       setIsEditing(true)
       setEditValue(label)
     }
@@ -92,10 +85,8 @@ function DiagramNode({ data, isConnectable }: any) {
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
-      setTimeout(() => {
-        inputRef.current?.focus()
-        inputRef.current?.select()
-      }, 0)
+      inputRef.current.focus()
+      inputRef.current.select()
     }
   }, [isEditing])
 
