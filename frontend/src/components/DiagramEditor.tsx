@@ -39,62 +39,70 @@ type Props = {
 // 노드 렌더링 컴포넌트
 function DiagramNode({ data, isConnectable }: any) {
   const [label, setLabel] = useState(data.label || '새 항목')
-  const textRef = useRef<HTMLDivElement>(null)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editValue, setEditValue] = useState(label)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
+  const handleStartEdit = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (textRef.current) {
-      textRef.current.contentEditable = 'true'
-      textRef.current.focus()
-      // 전체 텍스트 선택
-      const range = document.createRange()
-      range.selectNodeContents(textRef.current)
-      const sel = window.getSelection()
-      if (sel) {
-        sel.removeAllRanges()
-        sel.addRange(range)
-      }
+    e.preventDefault()
+    setIsEditing(true)
+    setEditValue(label)
+  }
+
+  const handleSaveEdit = () => {
+    const newLabel = editValue.trim() || '새 항목'
+    setLabel(newLabel)
+    setIsEditing(false)
+    if (data.onLabelChange) {
+      data.onLabelChange(newLabel)
     }
   }
 
-  const handleBlur = () => {
-    if (textRef.current) {
-      textRef.current.contentEditable = 'false'
-      const newLabel = textRef.current.textContent || '새 항목'
-      setLabel(newLabel)
-      if (data.onLabelChange) {
-        data.onLabelChange(newLabel)
-      }
-    }
+  const handleCancel = () => {
+    setIsEditing(false)
+    setEditValue(label)
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault()
-      handleBlur()
+      handleSaveEdit()
     } else if (e.key === 'Escape') {
       e.preventDefault()
-      if (textRef.current) {
-        textRef.current.contentEditable = 'false'
-        textRef.current.textContent = label
-      }
+      handleCancel()
     }
   }
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus()
+      inputRef.current.select()
+    }
+  }, [isEditing])
 
   return (
     <div
       className="rounded border-2 border-brass-2 bg-white px-4 py-2 shadow-md min-w-[120px]"
+      onDoubleClick={handleStartEdit}
     >
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
-      <div
-        ref={textRef}
-        onDoubleClick={handleDoubleClick}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        className="font-korean-serif text-sm text-ink cursor-text whitespace-nowrap outline-none"
-      >
-        {label}
-      </div>
+      {isEditing ? (
+        <input
+          ref={inputRef}
+          type="text"
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleSaveEdit}
+          onKeyDown={handleKeyDown}
+          onClick={(e) => e.stopPropagation()}
+          className="w-full font-korean-serif text-sm text-ink bg-white border-0 outline-none"
+        />
+      ) : (
+        <div className="font-korean-serif text-sm text-ink cursor-text whitespace-nowrap">
+          {label}
+        </div>
+      )}
       <Handle type="source" position={Position.Bottom} isConnectable={isConnectable} />
     </div>
   )
