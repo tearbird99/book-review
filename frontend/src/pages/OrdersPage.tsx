@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBooks } from '../contexts/BookContext'
-import { ordersApi, notesApi } from '../lib/api'
-import type { ApiOrder, ApiNote } from '../types/api'
+import { ordersApi } from '../lib/api'
+import type { ApiOrder } from '../types/api'
 
 export default function OrdersPage() {
   const navigate = useNavigate()
@@ -10,9 +10,8 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<ApiOrder[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [selectedNotes, setSelectedNotes] = useState<Set<number>>(new Set())
+  const [selectedBooks, setSelectedBooks] = useState<Set<number>>(new Set())
   const [orderTitle, setOrderTitle] = useState('')
-  const [availableNotes, setAvailableNotes] = useState<(ApiNote & { bookTitle: string })[]>([])
 
   // 주문 목록 조회
   const loadOrders = async () => {
@@ -25,27 +24,10 @@ export default function OrdersPage() {
   }
 
   // 생성 모달 열기
-  const handleOpenCreateModal = async () => {
+  const handleOpenCreateModal = () => {
     setIsCreateModalOpen(true)
-    setSelectedNotes(new Set())
+    setSelectedBooks(new Set())
     setOrderTitle('')
-
-    // 모든 책의 노트 조회
-    try {
-      const allNotes: (ApiNote & { bookTitle: string })[] = []
-      for (const book of books) {
-        const response = await notesApi.getByBookId(book.id)
-        response.data.forEach((note) => {
-          allNotes.push({
-            ...note,
-            bookTitle: book.title,
-          })
-        })
-      }
-      setAvailableNotes(allNotes)
-    } catch (error) {
-      console.error('노트 조회 실패:', error)
-    }
   }
 
   // 주문 생성
@@ -54,8 +36,8 @@ export default function OrdersPage() {
       alert('주문 제목을 입력하세요')
       return
     }
-    if (selectedNotes.size === 0) {
-      alert('최소 1개의 노트를 선택하세요')
+    if (selectedBooks.size === 0) {
+      alert('최소 1개의 책을 선택하세요')
       return
     }
 
@@ -63,7 +45,7 @@ export default function OrdersPage() {
     try {
       await ordersApi.create({
         title: orderTitle,
-        note_ids: Array.from(selectedNotes),
+        book_ids: Array.from(selectedBooks),
         status: 'pending',
       })
       await loadOrders()
@@ -224,38 +206,38 @@ export default function OrdersPage() {
                 />
               </div>
 
-              {/* 노트 선택 */}
+              {/* 책 선택 */}
               <div className="mb-6">
                 <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute mb-3">
-                  포함할 노트 ({selectedNotes.size}개 선택됨)
+                  포함할 책 ({selectedBooks.size}개 선택됨)
                 </label>
                 <div className="space-y-2">
-                  {availableNotes.length === 0 ? (
-                    <p className="text-sm text-ink-mute">작성된 노트가 없습니다</p>
+                  {books.length === 0 ? (
+                    <p className="text-sm text-ink-mute">등록된 책이 없습니다</p>
                   ) : (
-                    availableNotes.map((note) => (
+                    books.map((book) => (
                       <label
-                        key={note.id}
+                        key={book.id}
                         className="flex cursor-pointer items-center gap-3 rounded-sm border border-brass-2/15 bg-white/50 p-3 transition-colors hover:bg-brass-2/5"
                       >
                         <input
                           type="checkbox"
-                          checked={selectedNotes.has(note.id)}
+                          checked={selectedBooks.has(book.id)}
                           onChange={(e) => {
-                            const newSelected = new Set(selectedNotes)
+                            const newSelected = new Set(selectedBooks)
                             if (e.target.checked) {
-                              newSelected.add(note.id)
+                              newSelected.add(book.id)
                             } else {
-                              newSelected.delete(note.id)
+                              newSelected.delete(book.id)
                             }
-                            setSelectedNotes(newSelected)
+                            setSelectedBooks(newSelected)
                           }}
                           className="cursor-pointer"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="font-korean-serif text-sm text-ink">{note.bookTitle}</p>
-                          <p className="truncate font-korean-serif text-xs text-ink-mute">
-                            {note.content.substring(0, 100)}
+                          <p className="font-korean-serif text-sm text-ink">{book.title}</p>
+                          <p className="font-korean-serif text-xs text-ink-mute">
+                            {book.author} · {book.category}
                           </p>
                         </div>
                       </label>

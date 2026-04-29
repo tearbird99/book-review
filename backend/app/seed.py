@@ -145,11 +145,11 @@ def seed_data():
         session.add(pending_order)
         session.flush()  # ID 생성
 
-        # pending 주문에 노트 추가 (처음 3개)
-        for position, note in enumerate(notes[:3], start=1):
+        # pending 주문에 책 추가 (처음 3권)
+        for position, book in enumerate(books[:3], start=1):
             item = OrderItem(
                 order_id=pending_order.id,
-                note_id=note.id,
+                book_id=book.id,
                 position=position
             )
             session.add(item)
@@ -162,11 +162,11 @@ def seed_data():
         session.add(completed_order)
         session.flush()  # ID 생성
 
-        # completed 주문에 노트 추가 (다음 3개)
-        for position, note in enumerate(notes[3:6], start=1):
+        # completed 주문에 책 추가 (다음 3권)
+        for position, book in enumerate(books[3:6], start=1):
             item = OrderItem(
                 order_id=completed_order.id,
-                note_id=note.id,
+                book_id=book.id,
                 position=position
             )
             session.add(item)

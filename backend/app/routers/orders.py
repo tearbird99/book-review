@@ -6,7 +6,7 @@ from typing import List
 from ..database import get_session
 from ..models import (
     Order, OrderCreate, OrderRead, OrderStatusUpdate, OrderStatus,
-    OrderItem, OrderItemCreate, Note
+    OrderItem, OrderItemCreate, Book
 )
 
 # 라우터 생성
@@ -40,21 +40,21 @@ async def create_order(
     order_data: OrderCreate,
     session: Session = Depends(get_session)
 ):
-    """새 주문 생성 (노트 최소 1개 포함)"""
+    """새 주문 생성 (책 최소 1개 포함)"""
     # 빈 주문 방지
-    if not order_data.note_ids or len(order_data.note_ids) == 0:
+    if not order_data.book_ids or len(order_data.book_ids) == 0:
         raise HTTPException(
             status_code=400,
-            detail="주문에는 최소 1개의 노트가 포함되어야 합니다"
+            detail="주문에는 최소 1개의 책이 포함되어야 합니다"
         )
 
-    # 모든 노트 존재 확인
-    for note_id in order_data.note_ids:
-        note = session.get(Note, note_id)
-        if not note:
+    # 모든 책 존재 확인
+    for book_id in order_data.book_ids:
+        book = session.get(Book, book_id)
+        if not book:
             raise HTTPException(
                 status_code=404,
-                detail=f"노트 {note_id}를 찾을 수 없습니다"
+                detail=f"책 {book_id}를 찾을 수 없습니다"
             )
 
     # 주문 생성
@@ -66,10 +66,10 @@ async def create_order(
     session.flush()  # ID 생성을 위해 flush
 
     # 주문항목 생성 (position 할당)
-    for position, note_id in enumerate(order_data.note_ids, start=1):
+    for position, book_id in enumerate(order_data.book_ids, start=1):
         order_item = OrderItem(
             order_id=order.id,
-            note_id=note_id,
+            book_id=book_id,
             position=position
         )
         session.add(order_item)

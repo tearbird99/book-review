@@ -108,7 +108,7 @@ export const ordersApi = {
   // 주문 생성
   create: (data: {
     title: string;
-    note_ids: number[];
+    book_ids: number[];
     status?: string;
   }) => apiClient.post<ApiOrder>('/orders', data),
 

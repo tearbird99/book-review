@@ -140,8 +140,8 @@ class Order(OrderBase, table=True):
 
 
 class OrderCreate(OrderBase):
-    """주문 생성 스키마 (note_ids 포함)"""
-    note_ids: List[int]  # 주문에 포함할 노트 ID 리스트
+    """주문 생성 스키마 (book_ids 포함)"""
+    book_ids: List[int]  # 주문에 포함할 책 ID 리스트
 
 
 class OrderUpdate(SQLModel):
@@ -175,20 +175,20 @@ class OrderItem(OrderItemBase, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     order_id: int = Field(foreign_key="orders.id")
-    note_id: int = Field(foreign_key="notes.id")
+    book_id: int = Field(foreign_key="books.id")
 
     # 관계
     order: Optional[Order] = Relationship(back_populates="items")
-    note: Optional[Note] = Relationship()
+    book: Optional[Book] = Relationship()
 
 
 class OrderItemCreate(OrderItemBase):
     """주문항목 생성 스키마"""
-    note_id: int
+    book_id: int
 
 
 class OrderItemRead(OrderItemBase):
     """주문항목 조회 스키마"""
     id: int
     order_id: int
-    note_id: int
+    book_id: int

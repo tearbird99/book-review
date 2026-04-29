@@ -35,6 +35,6 @@ export interface ApiOrder {
 export interface ApiOrderItem {
   id: number;
   order_id: number;
-  note_id: number;
+  book_id: number;
   position: number;
 }
