@@ -553,7 +553,13 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
     }
     return [['', ''], ['', '']]
   })
+  const [imageData, setImageData] = useState(typeof noteData.content === 'string' && noteData.type === 'image' ? noteData.content : '')
+  const [imageWidth, setImageWidth] = useState(noteData.width || 400)
+  const [imageHeight, setImageHeight] = useState(noteData.height || 300)
+  const [imageCaption, setImageCaption] = useState(noteData.caption || '')
+  const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const imageInputRef = useRef<HTMLInputElement>(null)
 
   // 오늘 날짜 (max date)
   const today = new Date()
@@ -575,6 +581,14 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
           type: 'table',
           content: tableRows,
         })
+      } else if (noteData.type === 'image') {
+        saveContent = JSON.stringify({
+          type: 'image',
+          content: imageData,
+          width: imageWidth,
+          height: Math.round(imageHeight),
+          caption: imageCaption,
+        })
       } else {
         saveContent = JSON.stringify({
           type: noteData.type,
@@ -595,6 +609,178 @@ function NoteEditor({ note, onClose, onUpdate }: { note: ApiNote; onClose: () =>
 
   if (noteData.type === 'table') {
     return <TableEditor tableRows={tableRows} setTableRows={setTableRows} onClose={onClose} onSave={handleSave} isSaving={isSaving} />
+  }
+
+  if (noteData.type === 'image') {
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string
+        setImageData(dataUrl)
+        // 이미지의 원본 비율 계산
+        const img = new Image()
+        img.onload = () => {
+          const ratio = img.width / img.height
+          setImageAspectRatio(ratio)
+        }
+        img.src = dataUrl
+      }
+      reader.readAsDataURL(file)
+    }
+
+    return (
+      <div className="rounded-sm border border-brass-2/30 bg-gradient-to-br from-white to-white/50 px-6 py-5 shadow-[0_2px_12px_-4px_rgba(31,22,51,0.12)]">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-korean-serif text-sm font-semibold text-ink">이미지 편집</h3>
+          <button onClick={onClose} className="text-ink-mute hover:text-ink transition-colors">
+            ✕
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {/* 이미지 업로드 */}
+          <div>
+            <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute mb-2">
+              이미지 선택
+            </label>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="block w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm"
+            />
+          </div>
+
+          {/* 이미지 미리보기 (리사이징 가능) */}
+          {imageData && (
+            <div className="mt-4">
+              <p className="font-display text-xs uppercase tracking-[0.2em] text-ink-mute mb-3">미리보기 (모서리로 드래그하여 크기 조절)</p>
+              <div
+                style={{
+                  width: `${imageWidth}px`,
+                  height: `${imageHeight}px`,
+                  overflow: 'hidden',
+                  resize: 'both',
+                  border: '2px solid #5A3FA0',
+                  borderRadius: '4px',
+                  cursor: 'nwse-resize',
+                }}
+                onMouseDown={(e) => {
+                  const startX = e.clientX
+                  const startY = e.clientY
+                  const startWidth = imageWidth
+                  const startHeight = imageHeight
+
+                  const handleMouseMove = (moveEvent: MouseEvent) => {
+                    const deltaX = moveEvent.clientX - startX
+                    const deltaY = moveEvent.clientY - startY
+                    const newWidth = Math.max(50, startWidth + deltaX)
+
+                    // 원본 비율 유지
+                    let newHeight = startHeight + deltaY
+                    if (imageAspectRatio) {
+                      newHeight = newWidth / imageAspectRatio
+                    }
+
+                    setImageWidth(newWidth)
+                    setImageHeight(Math.max(50, newHeight))
+                  }
+
+                  const handleMouseUp = () => {
+                    document.removeEventListener('mousemove', handleMouseMove)
+                    document.removeEventListener('mouseup', handleMouseUp)
+                  }
+
+                  document.addEventListener('mousemove', handleMouseMove)
+                  document.addEventListener('mouseup', handleMouseUp)
+                }}
+              >
+                <img
+                  src={imageData}
+                  alt="미리보기"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                  className="pointer-events-none"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* 크기 조절 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute mb-2">
+                너비 (px)
+              </label>
+              <input
+                type="number"
+                value={imageWidth}
+                onChange={(e) => {
+                  const newWidth = Math.max(50, Number(e.target.value))
+                  setImageWidth(newWidth)
+                  if (imageAspectRatio) {
+                    setImageHeight(newWidth / imageAspectRatio)
+                  }
+                }}
+                min="50"
+                className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute mb-2">
+                높이 (px)
+              </label>
+              <input
+                type="number"
+                value={Math.round(imageHeight)}
+                onChange={(e) => {
+                  const newHeight = Math.max(50, Number(e.target.value))
+                  setImageHeight(newHeight)
+                  if (imageAspectRatio) {
+                    setImageWidth(newHeight * imageAspectRatio)
+                  }
+                }}
+                min="50"
+                className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          {/* 캡션 */}
+          <div>
+            <label className="block font-display text-xs uppercase tracking-[0.2em] text-ink-mute mb-2">
+              이미지 설명
+            </label>
+            <input
+              type="text"
+              value={imageCaption}
+              onChange={(e) => setImageCaption(e.target.value)}
+              className="w-full rounded-sm border border-brass-2/25 bg-white/70 px-3 py-2 font-korean-serif text-sm focus:border-brass-2 focus:outline-none"
+              placeholder="이미지에 대한 설명을 입력하세요 (선택사항)"
+            />
+          </div>
+        </div>
+
+        {/* 버튼 */}
+        <div className="flex gap-2 mt-6">
+          <button
+            onClick={onClose}
+            className="flex-1 rounded-sm border border-slate-400 px-4 py-2 font-korean-serif text-sm font-medium text-ink-mute transition-colors hover:border-brass-2/50 hover:text-ink-soft"
+          >
+            취소
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving || !imageData}
+            className="flex-1 rounded-sm bg-brass-2 px-4 py-2 font-korean-serif text-sm font-medium text-white transition-colors hover:bg-brass-2/90 disabled:opacity-50"
+          >
+            {isSaving ? '저장 중...' : '저장'}
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (

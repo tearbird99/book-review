@@ -30,6 +30,10 @@ export default function NoteCard({ note, onEdit, onDelete }: Props) {
   let pageNumber: number | null = null
   let noteType = 'text'
   let tableData: string[][] | null = null
+  let imageData: string | null = null
+  let imageWidth: number | null = null
+  let imageHeight: number | null = null
+  let imageCaption: string | null = null
 
   try {
     const parsed = JSON.parse(note.content)
@@ -43,7 +47,10 @@ export default function NoteCard({ note, onEdit, onDelete }: Props) {
       } else if (noteType === 'table') {
         tableData = parsed.content || []
       } else if (noteType === 'image') {
-        displayContent = '[이미지]'
+        imageData = parsed.content || null
+        imageWidth = parsed.width || 400
+        imageHeight = parsed.height || 300
+        imageCaption = parsed.caption || null
       } else {
         displayContent = parsed.content || ''
       }
@@ -54,6 +61,43 @@ export default function NoteCard({ note, onEdit, onDelete }: Props) {
 
   // 노트 타입 정보 추출
   const noteTypeInfo = getNoteTypeInfo(noteType)
+
+  // 이미지 노트인 경우 별도의 레이아웃
+  if (imageData) {
+    return (
+      <article
+        className="group relative flex flex-col rounded-sm bg-white p-6 shadow-[0_4px_20px_-6px_rgba(90,63,160,0.12)] transition-all hover:shadow-[0_6px_28px_-6px_rgba(90,63,160,0.15)] cursor-pointer"
+        onDoubleClick={() => onEdit?.(note.id)}
+      >
+        {/* 우상단 삭제 버튼 */}
+        <button
+          onClick={() => onDelete?.(note.id)}
+          aria-label="삭제"
+          className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center text-ink-mute opacity-0 transition-all group-hover:opacity-100 hover:text-red-500"
+        >
+          <TrashIcon />
+        </button>
+
+        {/* 날짜 */}
+        <time className="font-display text-[10px] uppercase tracking-[0.25em] text-ink-mute">
+          {formatDate(note.read_date)}
+        </time>
+
+        {/* 이미지 - 중앙 정렬 */}
+        <div className="flex flex-col items-center gap-3 mt-4">
+          <img
+            src={imageData}
+            alt="노트 이미지"
+            style={{ width: `${imageWidth}px`, height: `${imageHeight}px`, objectFit: 'contain', display: 'block' }}
+            className="rounded-sm"
+          />
+          {imageCaption && (
+            <p className="text-center font-korean-serif text-xs text-ink/70">{imageCaption}</p>
+          )}
+        </div>
+      </article>
+    )
+  }
 
   return (
     <article className="group relative flex gap-5 rounded-sm border border-brass-2/15 bg-white/50 px-6 py-5 shadow-[0_2px_12px_-4px_rgba(31,22,51,0.08)] transition-all hover:border-brass-2/30 hover:shadow-[0_4px_20px_-6px_rgba(90,63,160,0.12)]">
