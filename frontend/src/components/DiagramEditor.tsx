@@ -32,8 +32,8 @@ const handleStyles = `
 `
 
 type Props = {
-  initialData?: string
-  onSave: (data: string) => void
+  initialData?: string | { nodes: any[]; edges: any[]; nextId?: number }
+  onSave: (data: any) => void
 }
 
 // 노드 렌더링 컴포넌트
@@ -42,22 +42,17 @@ function DiagramNode({ data, isConnectable }: any) {
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(label)
   const inputRef = useRef<HTMLInputElement>(null)
+  const clickCountRef = useRef(0)
+  const clickTimeoutRef = useRef<number | null>(null)
 
-  const handleStartEdit = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    e.preventDefault()
-    setIsEditing(true)
-    setEditValue(label)
-  }
-
-  const handleSaveEdit = () => {
+  const handleSaveEdit = useCallback(() => {
     const newLabel = editValue.trim() || '새 항목'
     setLabel(newLabel)
     setIsEditing(false)
     if (data.onLabelChange) {
       data.onLabelChange(newLabel)
     }
-  }
+  }, [editValue, data])
 
   const handleCancel = () => {
     setIsEditing(false)
@@ -74,17 +69,40 @@ function DiagramNode({ data, isConnectable }: any) {
     }
   }
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (isEditing) return
+    e.stopPropagation()
+
+    clickCountRef.current += 1
+
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current)
+    }
+
+    clickTimeoutRef.current = window.setTimeout(() => {
+      clickCountRef.current = 0
+    }, 300)
+
+    if (clickCountRef.current === 2) {
+      clickCountRef.current = 0
+      setIsEditing(true)
+      setEditValue(label)
+    }
+  }
+
   useEffect(() => {
     if (isEditing && inputRef.current) {
-      inputRef.current.focus()
-      inputRef.current.select()
+      setTimeout(() => {
+        inputRef.current?.focus()
+        inputRef.current?.select()
+      }, 0)
     }
   }, [isEditing])
 
   return (
     <div
       className="rounded border-2 border-brass-2 bg-white px-4 py-2 shadow-md min-w-[120px]"
-      onDoubleClick={handleStartEdit}
+      onMouseDown={handleMouseDown}
     >
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
       {isEditing ? (
@@ -95,6 +113,7 @@ function DiagramNode({ data, isConnectable }: any) {
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={handleSaveEdit}
           onKeyDown={handleKeyDown}
+          onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
           className="w-full font-korean-serif text-sm text-ink bg-white border-0 outline-none"
         />
@@ -117,7 +136,7 @@ export default function DiagramEditor({ initialData, onSave }: Props) {
   useEffect(() => {
     if (initialData) {
       try {
-        const parsed = JSON.parse(initialData)
+        let parsed = typeof initialData === 'string' ? JSON.parse(initialData) : initialData
         if (parsed.nodes && Array.isArray(parsed.nodes) && parsed.nodes.length > 0) {
           const loadedNodes = parsed.nodes.map((n: any) => ({
             ...n,
@@ -202,7 +221,7 @@ export default function DiagramEditor({ initialData, onSave }: Props) {
       edges,
       nextId: nodeIdCounter,
     }
-    onSave(JSON.stringify(data))
+    onSave(data)
   }
 
   return (
